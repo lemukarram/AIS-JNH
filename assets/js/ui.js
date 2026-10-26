@@ -37,7 +37,7 @@ export function setNum(el, v, opts) {
   requestAnimationFrame(tick);
 }
 
-export function sparkline(values, { w = 120, h: ht = 28, color = 'var(--signal)' } = {}) {
+export function sparkline(values, { w = 120, h: ht = 28, color = 'var(--plot)' } = {}) {
   if (!values.length) return '';
   if (values.length === 1) values = [values[0], values[0]];
   const min = Math.min(...values), max = Math.max(...values), span = max - min || 1;

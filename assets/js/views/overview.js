@@ -35,7 +35,7 @@ export function mount(root) {
   AL.wire($('#tk', root));
 
   // ---- hourly chart (hand-built SVG, hover crosshair) ----
-  const W = 720, H = 220, pad = { l: 36, r: 8, t: 10, b: 22 };
+  const W = Math.max(300, ($('#hourly', root).clientWidth || 720) - 24), H = 220, pad = { l: 36, r: 8, t: 10, b: 22 };
   const today = s.hourly, avg = hourlyFor(new Date(Date.now() - 7 * 864e5));
   const max = Math.max(...today, ...avg) * 1.1;
   const x = (i) => pad.l + i / 23 * (W - pad.l - pad.r), y = (v) => H - pad.b - v / max * (H - pad.t - pad.b);
@@ -43,7 +43,7 @@ export function mount(root) {
   const line = (arr, to = 23) => arr.slice(0, to + 1).map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join('');
   const grid = [0, .25, .5, .75, 1].map(f => { const v = max * f / 1.1 * 1; return `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(max * f)}" y2="${y(max * f)}" class="gl"/><text x="${pad.l - 6}" y="${y(max * f) + 3}" class="ax" text-anchor="end">${Math.round(max * f)}</text>`; }).join('');
   const xt = [0, 4, 8, 12, 16, 20, 23].map(i => `<text x="${x(i)}" y="${H - 6}" class="ax" text-anchor="middle">${String(i).padStart(2, '0')}</text>`).join('');
-  $('#hourly', root).innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${t('ov.hourly')}">${grid}${xt}
+  $('#hourly', root).innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${t('ov.hourly')}">${grid}${xt}
     <path d="${line(avg)}" class="ln2"/>
     <path d="${line(today, nowH)} L${x(nowH)} ${y(0)} L${x(0)} ${y(0)}Z" class="area"/>
     <path d="${line(today, nowH)}" class="ln1"/>

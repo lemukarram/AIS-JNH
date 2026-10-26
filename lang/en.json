@@ -122,7 +122,7 @@
  "camname.kitchen": "Kitchen · back of house",
  "camname.outdoor": "Outdoor / Parking",
  "camname.dining": "Dining hall",
- "camname.bar": "Bar",
+ "camname.bar": "Beverage bar",
  "camname.terrace": "Terrace",
  "camname.lobby": "Lobby",
  "camname.waiting": "Waiting room",
@@ -133,5 +133,10 @@
  "nav.playback": "Playback",
  "nav.reports": "Reports",
  "nav.cameras": "Cameras & zones",
- "nav.settings": "Settings"
+ "nav.settings": "Settings",
+ "pilot.short": "Pilot",
+ "nav.short.wall": "Live",
+ "nav.short.alerts": "Alerts",
+ "nav.short.overview": "Overview",
+ "nav.short.analytics": "Analytics"
 }

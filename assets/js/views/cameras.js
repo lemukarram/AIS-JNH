@@ -23,7 +23,7 @@ export function mount(root) {
   const list = () => {
     $('#cm-t', root).innerHTML = `<thead><tr><th>${t('al.camera')}</th><th class="hide-m">${L('Stream', 'البث')}</th><th class="hide-m">${L('Health', 'الحالة')}</th><th>${L('Live', 'مباشر')}</th></tr></thead><tbody>${getCams().map((c, i) => `
       <tr data-i="${i}" tabindex="0" class="${i === sel ? 'sel' : ''}"><td><span class="led ${c.online ? '' : 'warn'}"></span> <b class="mono">${c.def.id}</b> ${esc(cn(c.def))}</td>
-      <td class="mono hide-m dim" dir="ltr">rtsp://10.0.${i + 4}.1${i}/stream1</td><td class="mono hide-m">${(99.2 + (i * 7 % 8) / 10).toFixed(1)}% · 1080p H.264</td><td class="mono">${c.fps}${t('fps') ? ' ' + t('fps') : ''}</td></tr>`).join('')}</tbody>`;
+      <td class="mono hide-m dim" dir="ltr">rtsp://10.0.${i + 4}.1${i}/stream1</td><td class="mono hide-m nowrap" dir="ltr">${(99.2 + (i * 7 % 8) / 10).toFixed(1)}% · 1080p H.264</td><td class="mono nowrap">${c.fps} ${t('fps')}</td></tr>`).join('')}</tbody>`;
     const c = getCams()[sel]; $('#ed-cam', root).textContent = `${c.def.id} · ${cn(c.def)}`;
     $('#zl', root).innerHTML = [...c.def.zones.map((z, i) => `<li><span class="sev ${z.kind === 'restricted' ? 'crit' : z.kind === 'queue' ? 'warn' : 'info'}">${esc(zoneName(z))}</span>${editable ? `<button class="btn sm ghost" data-del="${i}" aria-label="${L('Delete', 'حذف')}">${icon('x')}</button>` : ''}</li>`),
       c.def.line ? `<li><span class="sev info">${L('Tripwire line', 'خط العدّ')}</span><span class="mono dim">${L('IN', 'دخول')} ${c.in} · ${L('OUT', 'خروج')} ${c.out}</span></li>` : ''].join('');

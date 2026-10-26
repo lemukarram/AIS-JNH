@@ -25,18 +25,18 @@ export function mount(root) {
   const draw = () => {
     const H = history(range), tot = H.reduce((a, d) => a + d.total, 0), mx = Math.max(...H.map(d => d.total)) * 1.1;
     $('#an-sum', root).textContent = `${n(tot)} ${L('total', 'الإجمالي')} · ${n(Math.round(tot / H.length))} ${L('avg/day', 'المتوسط اليومي')}`;
-    const W = 760, Ht = 220, pl = 40, pr = 8, pt = 10, pb = 22, bw = (W - pl - pr) / H.length;
+    const W = Math.max(300, ($('#c-days', root).clientWidth || 760) - 24), Ht = 220, pl = 40, pr = 8, pt = 10, pb = 22, bw = (W - pl - pr) / H.length;
     const y = (v) => Ht - pb - v / mx * (Ht - pt - pb);
     const bars = H.map((d, i) => `<rect x="${pl + i * bw + 1}" y="${y(d.total)}" width="${Math.max(1, bw - 2)}" height="${Ht - pb - y(d.total)}" class="${d.date.getDay() === 5 || d.date.getDay() === 6 ? 'bar-w' : 'bar-d'}" data-i="${i}"/>`).join('');
     const grid = [0, .5, 1].map(f => `<line x1="${pl}" x2="${W - pr}" y1="${y(mx * f)}" y2="${y(mx * f)}" class="gl"/><text x="${pl - 6}" y="${y(mx * f) + 3}" class="ax" text-anchor="end">${Math.round(mx * f / 1.1)}</text>`).join('');
-    $('#c-days', root).innerHTML = `<svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none">${grid}${bars}<text x="${pl}" y="${Ht - 6}" class="ax">${fmtDate(H[0].date)}</text><text x="${W - pr}" y="${Ht - 6}" class="ax" text-anchor="end">${fmtDate(H[H.length - 1].date)}</text></svg><div class="tip mono" id="dtip" hidden></div>`;
+    $('#c-days', root).innerHTML = `<svg viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}">${grid}${bars}<text x="${pl}" y="${Ht - 6}" class="ax">${fmtDate(H[0].date)}</text><text x="${W - pr}" y="${Ht - 6}" class="ax" text-anchor="end">${fmtDate(H[H.length - 1].date)}</text></svg><div class="tip mono" id="dtip" hidden></div>`;
     const tip = $('#dtip', root);
     $$('rect[data-i]', root).forEach(r => {
       r.addEventListener('pointerenter', () => { const d = H[+r.dataset.i]; tip.hidden = false; tip.innerHTML = `${fmtDate(d.date, { weekday: 'short', day: '2-digit', month: 'short' })}<br><b>${n(d.total)}</b>`; tip.style.insetInlineStart = ((+r.dataset.i + .5) / H.length * 92 + 5) + '%'; });
       r.addEventListener('pointerleave', () => tip.hidden = true);
     });
     // heatmap weekday x hour (from the same curve, so it agrees with the dashboard)
-    const days = L(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']);
+    const days = L(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']);
     const order = [6, 0, 1, 2, 3, 4, 5].map(i => i === 6 ? 6 : i);
     const hm = [0, 1, 2, 3, 4, 5, 6].map(d => Array.from({ length: 18 }, (_, k) => hourCurve(k + 6, d) * ([.85, .8, .8, .85, .95, 1.25, 1.15][d])));
     const hmax = Math.max(...hm.flat());
@@ -48,10 +48,10 @@ export function mount(root) {
     // forecast
     const today = hourlyFor(new Date()), nowH = new Date(get().now).getHours();
     const fc = today.map((v, i) => Math.round(v * (1 + Math.sin(i) * .04)));
-    const mxf = Math.max(...fc) * 1.1, Wf = 520, Hf = 160, x = (i) => 24 + i / 23 * (Wf - 30), yf = (v) => Hf - 18 - v / mxf * (Hf - 28);
+    const mxf = Math.max(...fc) * 1.1, Wf = Math.max(260, ($('#c-fc', root).clientWidth || 520) - 24), Hf = 160, x = (i) => 24 + i / 23 * (Wf - 30), yf = (v) => Hf - 18 - v / mxf * (Hf - 28);
     const d = fc.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + yf(v).toFixed(1)).join('');
     const pk = fc.indexOf(Math.max(...fc));
-    $('#c-fc', root).innerHTML = `<svg viewBox="0 0 ${Wf} ${Hf}" preserveAspectRatio="none"><line x1="${x(nowH)}" x2="${x(nowH)}" y1="6" y2="${Hf - 18}" class="hx"/><path d="${d}" class="ln2" style="stroke:var(--signal)"/><circle cx="${x(pk)}" cy="${yf(fc[pk])}" r="4" class="hd"/>${[0, 6, 12, 18, 23].map(i => `<text x="${x(i)}" y="${Hf - 4}" class="ax" text-anchor="middle">${String(i).padStart(2, '0')}</text>`).join('')}</svg>
+    $('#c-fc', root).innerHTML = `<svg viewBox="0 0 ${Wf} ${Hf}" width="${Wf}" height="${Hf}"><line x1="${x(nowH)}" x2="${x(nowH)}" y1="6" y2="${Hf - 18}" class="hx"/><path d="${d}" class="ln2" style="stroke:var(--signal)"/><circle cx="${x(pk)}" cy="${yf(fc[pk])}" r="4" class="hd"/>${[0, 6, 12, 18, 23].map(i => `<text x="${x(i)}" y="${Hf - 4}" class="ax" text-anchor="middle">${String(i).padStart(2, '0')}</text>`).join('')}</svg>
       <p class="mono dim small">${L('Predicted peak', 'الذروة المتوقعة')}: <b>${String(pk).padStart(2, '0')}:00</b> · ${L('suggested staffing', 'التوظيف المقترح')}: <b>${Math.max(2, Math.round(fc[pk] / 38))}</b></p>`;
   };
   root.addEventListener('click', (e) => {
@@ -59,5 +59,7 @@ export function mount(root) {
     if (e.target.closest('#an-csv')) { downloadCSV('footfall.csv', [[L('Date', 'التاريخ'), L('Footfall', 'عدد الزوار')], ...history(range).map(d => [d.date.toISOString().slice(0, 10), d.total])]); toast('CSV ✓'); }
   });
   draw();
-  return () => {};
+  let rt; const onResize = () => { clearTimeout(rt); rt = setTimeout(draw, 150); };
+  addEventListener('resize', onResize);
+  return () => removeEventListener('resize', onResize);
 }

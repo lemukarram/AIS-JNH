@@ -7,7 +7,7 @@ import { ACCOUNTS, CAN } from '../auth.js';
 import { PRESETS, ALERT_TYPES } from '../presets.js';
 import { icon } from '../icons.js';
 
-const TABS = [['brand', 'Branding', 'الهوية'], ['venue', 'Venue', 'الموقع'], ['ai', 'Detection & rules', 'الاكتشاف والقواعد'], ['users', 'Users & roles', 'المستخدمون والأدوار'], ['integ', 'Integrations', 'التكاملات'], ['health', 'System health', 'صحة النظام'], ['audit', 'Audit log', 'سجل التدقيق'], ['leads', 'Leads', 'العملاء المحتملون']];
+const TABS = [['brand', 'Branding', 'الهوية البصرية'], ['venue', 'Venue', 'الموقع'], ['ai', 'Detection & rules', 'الاكتشاف والقواعد'], ['users', 'Users & roles', 'المستخدمون والأدوار'], ['integ', 'Integrations', 'التكاملات'], ['health', 'System health', 'صحة النظام'], ['audit', 'Audit log', 'سجل التدقيق'], ['leads', 'Leads', 'العملاء المحتملون']];
 
 export function mount(root) {
   let tab = 'brand', timer;
@@ -22,7 +22,7 @@ export function mount(root) {
       body.innerHTML = `<div class="form"><div class="field"><label class="label" for="b-name">${L('Product name', 'اسم المنتج')}</label><input id="b-name" value="${esc(b.name)}"></div>
         <div class="field"><label class="label" for="b-venue">${L('Venue name', 'اسم الموقع')}</label><input id="b-venue" value="${esc(venueName(P()))}"></div>
         <div class="field"><label class="label" for="b-col">${L('Accent colour', 'اللون المميز')}</label><div class="row"><input id="b-col" type="color" value="${b.accent}" class="colorin"><span class="mono">${b.accent}</span><button class="btn sm" id="b-reset">${L('Reset', 'استعادة')}</button></div></div>
-        <div class="field"><label class="label" for="b-logo">${L('Logo (PNG/SVG)', 'الشعار')}</label><input id="b-logo" type="file" accept="image/png,image/svg+xml,image/jpeg"></div>
+        <div class="field"><label class="label" for="b-logo">${L('Logo (PNG/SVG)', 'الشعار')}</label><div class="row" style="justify-content:start"><label class="btn sm" for="b-logo">${L('Choose file', 'اختيار ملف')}</label><span class="dim small" id="b-logo-n">${L('No file chosen', 'لم يتم اختيار ملف')}</span></div><input id="b-logo" class="sr-only" type="file" accept="image/png,image/svg+xml,image/jpeg"></div>
         <p class="dim small">${L('Changes apply instantly across the app — rebrand for each prospect in seconds.', 'تُطبّق التغييرات فوراً في كل الشاشات — أعد التسمية لكل عميل في ثوانٍ.')}</p></div>`;
       const save = () => { pref.write('brand', { name: b.name, accent: b.accent, logo: b.logo }); };
       const refresh = () => { document.dispatchEvent(new CustomEvent('rebrand')); };
@@ -30,7 +30,7 @@ export function mount(root) {
       $('#b-venue', body).oninput = (e) => { P().venue = P().venueAr = e.target.value; refresh(); };
       $('#b-col', body).oninput = (e) => { b.accent = e.target.value; document.documentElement.style.setProperty('--signal', b.accent); const lum = parseInt(b.accent.slice(1, 3), 16) * .3 + parseInt(b.accent.slice(3, 5), 16) * .6 + parseInt(b.accent.slice(5), 16) * .1; document.documentElement.style.setProperty('--signal-ink', lum > 120 ? '#10140A' : '#FFFFFF'); $('.mono', body).textContent = b.accent; save(); audit('brand.color', b.accent); };
       $('#b-reset', body).onclick = () => { b.accent = '#C6F432'; document.documentElement.style.setProperty('--signal', b.accent); document.documentElement.style.setProperty('--signal-ink', '#10140A'); save(); views.brand(); };
-      $('#b-logo', body).onchange = (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { b.logo = r.result; save(); refresh(); audit('brand.logo', f.name); toast(L('Logo updated', 'تم تحديث الشعار')); }; r.readAsDataURL(f); };
+      $('#b-logo', body).onchange = (e) => { const f = e.target.files[0]; if (!f) return; $('#b-logo-n', body).textContent = f.name; const r = new FileReader(); r.onload = () => { b.logo = r.result; save(); refresh(); audit('brand.logo', f.name); toast(L('Logo updated', 'تم تحديث الشعار')); }; r.readAsDataURL(f); };
     },
     venue() {
       body.innerHTML = `<div class="form"><span class="label">${L('Industry preset', 'قطاع النشاط')}</span><div class="seg">${Object.keys(PRESETS).map(id => `<button class="btn" data-p="${id}" aria-pressed="${id === get().preset}">${t('preset.' + id)}</button>`).join('')}</div>
@@ -66,7 +66,7 @@ export function mount(root) {
     },
     health() {
       const draw = () => { const k = get().kpi || {}, m = (l, v, u, w) => `<div class="hl"><span class="label">${l}</span><b class="num">${v}<small>${u}</small></b><i class="bar" style="--w:${w}"></i></div>`; const ph = performance.now() / 1000;
-        body.innerHTML = `<div class="health">${m('GPU / NPU temp', Math.round(58 + Math.sin(ph / 7) * 4), '°C', .6)}${m('CPU', Math.round(34 + Math.sin(ph / 5) * 8), '%', .4)}${m(L('Inference FPS', 'إطارات الاستدلال'), k.fps || 0, ' fps', (k.fps || 0) / 40)}${m(L('Latency', 'التأخير'), k.latency || 0, ' ms', (k.latency || 0) / 300)}${m(L('Queue depth', 'عمق الطابور'), Math.max(0, Math.round(2 + Math.sin(ph / 3) * 2)), '', .2)}${m(L('Storage', 'التخزين'), '412', ' / 2000 GB', .21)}${m(L('Cameras online', 'كاميرات متصلة'), `${k.cams}/${k.camsTotal}`, '', (k.cams || 0) / (k.camsTotal || 1))}${m(L('Uptime', 'مدة التشغيل'), '14d 06h', '', .9)}</div>`; };
+        body.innerHTML = `<div class="health">${m(L('GPU / NPU temp', 'حرارة المعالج الرسومي / العصبي'), Math.round(58 + Math.sin(ph / 7) * 4), '°C', .6)}${m(L('CPU', 'المعالج'), Math.round(34 + Math.sin(ph / 5) * 8), '%', .4)}${m(L('Inference FPS', 'إطارات الاستدلال'), k.fps || 0, ' fps', (k.fps || 0) / 40)}${m(L('Latency', 'التأخير'), k.latency || 0, ' ms', (k.latency || 0) / 300)}${m(L('Queue depth', 'عمق الطابور'), Math.max(0, Math.round(2 + Math.sin(ph / 3) * 2)), '', .2)}${m(L('Storage', 'التخزين'), '412', ' / 2000 GB', .21)}${m(L('Cameras online', 'كاميرات متصلة'), `${k.cams}/${k.camsTotal}`, '', (k.cams || 0) / (k.camsTotal || 1))}${m(L('Uptime', 'مدة التشغيل'), '14d 06h', '', .9)}</div>`; };
       draw(); timer = setInterval(() => tab === 'health' && draw(), 2000);
     },
     audit() {

@@ -67,7 +67,7 @@ function shell(keepRoute) {
       <button class="iconbtn" id="b-out" data-i18n-title="signout">${icon('logout')}</button>
     </header>
     <main id="view" tabindex="-1"></main>
-    <nav class="bottomnav" aria-label="${L('Main navigation', 'التنقل الرئيسي')}">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['analytics', 'chart']].filter(([id]) => canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.cta').split(' ')[0]}</span></a></nav>
+    <nav class="bottomnav" aria-label="${L('Main navigation', 'التنقل الرئيسي')}">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['analytics', 'chart']].filter(([id]) => canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.short.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.short')}</span></a></nav>
   </div>`;
   applyDom(root);
   $('#b-theme').onclick = switchTheme; $('#b-lang').onclick = switchLang;

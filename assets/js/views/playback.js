@@ -11,7 +11,7 @@ const STAGES = () => [L('Ingest', 'استيعاب'), L('Detect', 'اكتشاف')
 export function mount(root) {
   let cam = 0, playing = true, speed = 1, pos = new Date(get().now).getHours() * 60 + new Date(get().now).getMinutes(), raf, jobs = [], timer;
   const day0 = new Date(get().now); day0.setHours(0, 0, 0, 0);
-  root.innerHTML = `<div class="page pb"><div class="page-head"><div><span class="label">${t('nav.analyse')}</span><h1>${L('Playback & post-processing', 'التشغيل والمعالجة اللاحقة')}</h1></div>
+  root.innerHTML = `<div class="page pb"><div class="page-head"><div><span class="label">${t('nav.analyse')}</span><h1>${L('Playback & post-processing', 'المقاطع المسجّلة والمعالجة اللاحقة')}</h1></div>
     <select id="pb-cam" class="sel" aria-label="${t('al.camera')}">${getCams().map((c, i) => `<option value="${i}">${c.def.id} · ${cn(c.def)}</option>`).join('')}</select></div>
     <div class="pb-grid"><section class="panel pb-player"><div class="clip big"><canvas width="960" height="540"></canvas><i class="tick tl"></i><i class="tick br"></i><span class="mono clip-l" id="pb-ts"></span></div>
       <div class="transport"><button class="btn sm" id="pb-play" aria-pressed="true">${icon('play')}<span>${L('Pause', 'إيقاف مؤقت')}</span></button>

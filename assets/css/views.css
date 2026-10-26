@@ -34,7 +34,7 @@
   .hero-kpi .big{font-size:clamp(3.5rem,7vw,5.5rem);line-height:.95;font-weight:700;letter-spacing:-.03em;display:flex;align-items:baseline;gap:10px}
   .hero-kpi small{font-size:var(--t-lg);color:var(--fg-2);font-weight:400}
   .gauge{position:relative;height:10px;background:var(--ink-3)}
-  .gauge-fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--v,0));background:var(--signal);transition:transform .6s var(--ease)}
+  .gauge-fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--v,0));background:var(--plot);transition:transform .6s var(--ease)}
   [dir=rtl] .gauge-fill{transform-origin:right}
   .gauge.hot .gauge-fill{background:var(--warn)}
   .gauge-ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),var(--ink-1) calc(10% - 1px) 10%)}
@@ -43,19 +43,19 @@
   .kpi{padding:var(--s4);display:grid;gap:6px;border-inline-end:1px solid var(--line);border-block-end:1px solid var(--line);align-content:start;min-width:0}
   .kpi b{font:700 var(--t-2xl)/1 var(--font-mono);letter-spacing:-.02em}
   .kpi [data-v][data-of]::after{content:attr(data-of);font-size:var(--t-sm);color:var(--fg-2);margin-inline-start:6px;font-weight:400}
-  .spark{height:22px;color:var(--signal)}.spark svg{width:100%;height:22px}
+  .spark{height:22px;color:var(--plot)}.spark svg{width:100%;height:22px}
   .chart-panel{grid-area:chart}.chart{padding:var(--s3) var(--s4) var(--s4);position:relative}
-  .chart svg{width:100%;height:220px;display:block}
+  .chart svg{max-width:100%;height:auto;display:block}
   .chart .gl{stroke:var(--line);stroke-width:1}.chart .ax{fill:var(--fg-2);font:10px var(--font-mono)}
-  .chart .ln1{fill:none;stroke:var(--signal);stroke-width:2;vector-effect:non-scaling-stroke}
+  .chart .ln1{fill:none;stroke:var(--plot);stroke-width:2;vector-effect:non-scaling-stroke}
   .chart .ln2{fill:none;stroke:var(--fg-2);stroke-width:1.5;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
-  .chart .area{fill:var(--signal-dim);stroke:none}.chart .hx{stroke:var(--fg-2);vector-effect:non-scaling-stroke}.chart .hd{fill:var(--signal)}
+  .chart .area{fill:var(--signal-dim);stroke:none}.chart .hx{stroke:var(--fg-2);vector-effect:non-scaling-stroke}.chart .hd{fill:var(--plot)}
   .tip{position:absolute;inset-block-start:8px;translate:8px 0;background:var(--ink-3);border:1px solid var(--line-strong);padding:6px 8px;font-size:var(--t-xs);pointer-events:none;line-height:1.5;z-index:2}
-  .legend{display:flex;gap:10px;align-items:center;font-size:var(--t-xs);color:var(--fg-2)}.sw{display:inline-block;width:14px;height:2px;margin-inline-end:4px}.sw.s1{background:var(--signal)}.sw.s2{background:var(--fg-2)}
+  .legend{display:flex;gap:10px;align-items:center;font-size:var(--t-xs);color:var(--fg-2)}.sw{display:inline-block;width:14px;height:2px;margin-inline-end:4px}.sw.s1{background:var(--plot)}.sw.s2{background:var(--fg-2)}
   .floor{grid-area:floor}.floor-body{padding:var(--s3)}.floor canvas{width:100%;height:auto;aspect-ratio:560/300}
   .zones{grid-area:zones}.zones ol{padding:var(--s2) var(--s4) var(--s4);display:grid}
   .zones li{display:grid;grid-template-columns:1fr 80px auto;gap:var(--s3);align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:var(--t-sm)}
-  .zones li small{display:block;font-size:10px}.bar{height:4px;background:var(--ink-3);position:relative}.bar::after{content:"";position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--w));background:var(--signal);transition:transform .5s var(--ease)}
+  .zones li small{display:block;font-size:10px}.bar{height:4px;background:var(--ink-3);position:relative}.bar::after{content:"";position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--w));background:var(--plot);transition:transform .5s var(--ease)}
   .ticker{grid-area:tick}
   @container (min-width:0){}
   @media (max-width:1100px){.ov-grid{grid-template-columns:1fr;grid-template-areas:"hero" "kpis" "chart" "floor" "zones" "tick"}}
@@ -159,14 +159,14 @@
   /* analytics */
   .an-grid{display:grid;gap:var(--s4);grid-template-columns:3fr 2fr;grid-template-areas:"days heat" "fun fc"}
   .a-days{grid-area:days}.a-heat{grid-area:heat}.a-fun{grid-area:fun}.a-fc{grid-area:fc}
-  .bar-d{fill:var(--fg-2)}.bar-w{fill:var(--signal)}.chart rect[data-i]:hover{fill:var(--fg-0)}
+  .bar-d{fill:var(--fg-2)}.bar-w{fill:var(--plot)}.chart rect[data-i]:hover{fill:var(--fg-0)}
   .hm{display:grid;grid-template-columns:auto repeat(18,1fr);gap:2px;align-items:center}
   .hm .hl{font-size:10px;color:var(--fg-2);padding-inline-end:6px}
   .hm i{height:22px;background:color-mix(in oklab,var(--signal) calc(var(--v)*100%),var(--ink-3))}
   .hm-axis{display:flex;justify-content:space-between;font-size:10px;color:var(--fg-2);padding-inline-start:36px;margin-top:6px}
   .funnel{padding:var(--s4);display:grid;gap:10px}
   .fstep{display:grid;grid-template-columns:90px 1fr 60px 40px;align-items:center;gap:10px;font-size:var(--t-sm)}
-  .fstep i{height:14px;background:var(--signal);transform-origin:left;transform:scaleX(var(--w));opacity:.85}
+  .fstep i{height:14px;background:var(--plot);transform-origin:left;transform:scaleX(var(--w));opacity:.85}
   [dir=rtl] .fstep i{transform-origin:right}
   .fstep b{text-align:end}
   @media (max-width:1100px){.an-grid{grid-template-columns:1fr;grid-template-areas:"days" "heat" "fun" "fc"}}
@@ -239,4 +239,29 @@
   input[dir=ltr]::placeholder{text-align:start}
   [dir=rtl] .tile-top{direction:rtl}
   @media (max-width:1100px){.hijri{display:none}}
+}
+@layer views{
+  .nowrap{white-space:nowrap}
+  /* time/number plots stay left-to-right, as in major Arabic analytics products; labels inside remain Arabic */
+  .chart,.hm,.hm-axis{direction:ltr}
+  .hm .hl{text-align:end;padding-inline:0 8px}
+  .hm{grid-template-columns:auto repeat(18,1fr)}
+  [dir=rtl] .tbl td.mono,[dir=rtl] .tbl td .num{text-align:start}
+  .tip{direction:rtl}
+}
+@layer views{
+  /* touch targets: 44px on phones/tablets */
+  @media (max-width:900px),(pointer:coarse){
+    .btn,.chip{min-height:44px;min-width:44px;justify-content:center}
+    .btn.sm{min-height:44px;padding-inline:12px}
+    .iconbtn{width:44px;height:44px}
+    .search{min-height:44px;min-width:44px;justify-content:center}
+    .tabs button,.rp-list>button{min-height:44px}
+    .tbl tbody tr{height:44px}
+    .top{gap:var(--s2);padding-inline:var(--s3)}
+    .sel{min-height:44px}
+  }
+}
+@layer views{
+  :root[data-theme=light] .nav .count{color:#fff}
 }

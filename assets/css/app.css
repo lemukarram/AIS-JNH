@@ -33,7 +33,7 @@
     --signal-dim:color-mix(in oklab,var(--signal) 18%,transparent);
     --font-display:"Space Grotesk","Plex Arabic",system-ui,sans-serif;
     --font-text:"IBM Plex Sans","Plex Arabic",system-ui,sans-serif;
-    --font-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+    --font-mono:"JetBrains Mono","Plex Arabic",ui-monospace,Consolas,monospace;
     --t-xs:.6875rem;--t-sm:.8125rem;--t-md:.9375rem;--t-lg:1.125rem;--t-xl:1.5rem;--t-2xl:2.125rem;--t-3xl:3rem;
     --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;
     --rail-w:216px;--rail-w-c:56px;--top-h:52px;
@@ -47,6 +47,7 @@
     --fg-0:#ECF1F5;--fg-1:#B4C0CB;--fg-2:#7F8D9A;
     --ok:#4ADE80;--warn:#FBBF24;--crit:#FF5C5C;--info:#5CC8FF;
     --scrim:rgba(5,8,10,.72);
+    --plot:var(--signal);
   }
   :root[data-theme="light"]{
     color-scheme:light;
@@ -56,6 +57,7 @@
     --ok:#0F7A3C;--warn:#8A5A00;--crit:#C21F1F;--info:#0B6FA4;
     --scrim:rgba(230,235,238,.8);
     --signal-text:#3E5200;
+    --plot:#587300;
   }
   :root:not([data-theme="light"]){--signal-text:var(--signal)}
 }
@@ -98,7 +100,7 @@
   .sev.warn{color:var(--warn)}.sev.warn::before{background:currentColor;clip-path:polygon(50% 0,100% 100%,0 100%)}
   .sev.info{color:var(--info)}.sev.info::before{background:currentColor;border-radius:50%}
   .panel{background:var(--ink-1);border:1px solid var(--line);position:relative}
-  .panel>header{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
+  .panel>header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2) var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
   .kbd{font:500 10px/1 var(--font-mono);padding:3px 5px;border:1px solid var(--line-strong);border-radius:2px;color:var(--fg-2)}
   .toast-host{position:fixed;inset-block-end:var(--s4);inset-inline-end:var(--s4);display:grid;gap:var(--s2);z-index:90}
   .toast{background:var(--ink-3);border:1px solid var(--line-strong);border-inline-start:3px solid var(--signal);padding:var(--s3) var(--s4);font-size:var(--t-sm);animation:slidein var(--med) var(--ease)}
