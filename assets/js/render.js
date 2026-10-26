@@ -32,9 +32,15 @@ function person(ctx, a, x, y, w, h, tint) {
 
 export function drawTile(canvas, cam, opts = {}) {
   if (!C) refreshColors();
-  const ctx = canvas.getContext('2d'); const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d'); const W0 = canvas.width, H0 = canvas.height; let W = W0, H = H0;
   const fl = get().flags, def = cam.def, t = simTime();
-  // floor
+  const rp = cam.replay?.ready && cam.replay.video.readyState >= 2 ? cam.replay : null;
+  if (rp) {
+    // real footage, letterboxed; overlay coordinates are normalised to the video frame
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W0, H0);
+    const vw = rp.video.videoWidth || 16, vh = rp.video.videoHeight || 9, k = Math.min(W0 / vw, H0 / vh), dw = vw * k, dh = vh * k, ox = (W0 - dw) / 2, oy = (H0 - dh) / 2;
+    ctx.drawImage(rp.video, ox, oy, dw, dh); ctx.save(); ctx.translate(ox, oy); W = dw; H = dh;
+  } else {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#12181d'); g.addColorStop(1, '#0d1216');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = 'rgba(255,255,255,.035)'; ctx.lineWidth = 1; ctx.beginPath();
@@ -42,6 +48,7 @@ export function drawTile(canvas, cam, opts = {}) {
   for (let y = 0; y <= H; y += H / 9) { ctx.moveTo(0, y + .5); ctx.lineTo(W, y + .5); }
   ctx.stroke();
   furniture(ctx, def.scene, W, H);
+  }
   if (!cam.online) { reconnect(ctx, W, H, t); return; }
 
   // zones
@@ -65,7 +72,9 @@ export function drawTile(canvas, cam, opts = {}) {
   const sorted = [...cam.agents].sort((a, b) => a.y - b.y);
   for (const a of sorted) {
     const bw = a.box[0] * W, bh = a.box[1] * H, x = a.x * W, y = a.y * H;
-    if (a.cls === 'car') { ctx.fillStyle = '#34414c'; ctx.beginPath(); ctx.roundRect(x - bw / 2, y - bh / 3, bw, bh * .66, 6); ctx.fill(); }
+    if (rp) {
+      if (fl.blur && a.cls === 'person') { ctx.fillStyle = 'rgba(70,85,98,.92)'; ctx.fillRect(x - bw / 2, y - bh, bw, bh * .22); }
+    } else if (a.cls === 'car') { ctx.fillStyle = '#34414c'; ctx.beginPath(); ctx.roundRect(x - bw / 2, y - bh / 3, bw, bh * .66, 6); ctx.fill(); }
     else if (a.cls === 'bag') { ctx.fillStyle = '#5a4a36'; ctx.fillRect(x - 6, y - 5, 12, 10); }
     else person(ctx, a, x, y, bw * .8, bh, a.staff ? '#3a5a6b' : `hsl(${200 + a.hue * 40},12%,${34 + a.hue * 14}%)`);
     if (fl.blur && a.cls === 'person') { ctx.fillStyle = 'rgba(90,110,125,.85)'; ctx.beginPath(); ctx.arc(x, y - bh * .4, bw * .26, 0, 7); ctx.fill(); }
@@ -75,7 +84,7 @@ export function drawTile(canvas, cam, opts = {}) {
       a.trail.forEach(([tx, ty], i) => i ? ctx.lineTo(tx * W, ty * H) : ctx.moveTo(tx * W, ty * H)); ctx.stroke();
     }
     if (fl.boxes) {
-      const bx = x - bw / 2, by = y - bh * .55, hot = cam.lock && cam.lock.until > t && Math.hypot(a.x - cam.lock.at[0], a.y - cam.lock.at[1]) < .12;
+      const bx = x - bw / 2, by = rp ? y - bh : y - bh * .55, hot = cam.lock && cam.lock.until > t && Math.hypot(a.x - cam.lock.at[0], a.y - cam.lock.at[1]) < .12;
       ctx.strokeStyle = hot ? C.crit : C.signal; ctx.lineWidth = hot ? 2 : 1;
       corners(ctx, bx, by, bw, bh);
       if (opts.labels !== false) {
@@ -92,6 +101,10 @@ export function drawTile(canvas, cam, opts = {}) {
     ctx.strokeStyle = C.crit; ctx.globalAlpha = Math.min(1, k * 1.5); ctx.lineWidth = 1.5;
     ctx.strokeRect(lx - r, ly - r, r * 2, r * 2); ctx.beginPath(); ctx.moveTo(lx - r - 8, ly); ctx.lineTo(lx - r + 8, ly); ctx.moveTo(lx + r - 8, ly); ctx.lineTo(lx + r + 8, ly); ctx.moveTo(lx, ly - r - 8); ctx.lineTo(lx, ly - r + 8); ctx.moveTo(lx, ly + r - 8); ctx.lineTo(lx, ly + r + 8); ctx.stroke();
     ctx.globalAlpha = 1; ctx.lineWidth = 1;
+  }
+  if (rp) {
+    ctx.restore(); W = W0; H = H0;
+    ctx.fillStyle = '#B4C0CB'; ctx.font = '500 9px "JetBrains Mono",monospace'; ctx.fillText('SAMPLE FOOTAGE · BAKED DETECTIONS', 10, H0 - 28);
   }
   // low-light IR look + grain
   if (def.night) { ctx.fillStyle = 'rgba(30,255,120,.06)'; ctx.globalCompositeOperation = 'overlay'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }

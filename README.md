@@ -4,7 +4,7 @@ Sales-demo control room for cafés, restaurants and hospitals. Full brief: [docs
 
 ## Status
 Built: design system, EN/AR (RTL) shell, simulation engine, login, overview, live wall, alerts, analytics, playback + batch-job simulation, reports (PDF/CSV), cameras and zone/line editor, settings, RBAC, PHP API + installer, bake tool, docs.
-Not built yet: baked-track replay over <video> in the browser (tool + schema exist), in-browser live inference (stretch), polygon zones (rectangles + tripwire lines only), full-text QA across all screens/sizes.
+Not built yet: in-browser live inference (stretch), polygon zones (rectangles + tripwire lines only), full QA across all screens/sizes. Baked-track replay is wired but untested with real YOLO output.
 
 Deploy: [README_DEPLOY.md](README_DEPLOY.md) · Sales script: [DEMO_SCRIPT.md](DEMO_SCRIPT.md)
 

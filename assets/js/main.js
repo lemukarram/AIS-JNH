@@ -6,6 +6,7 @@ import { restoreRemote, logout, can, canView } from './auth.js';
 import { icon } from './icons.js';
 import { $, $$, h, toast, modal, clock, esc, announce } from './ui.js';
 import { PRESETS } from './presets.js';
+import './replay.js';
 import { post } from './api.js';
 
 const NAV = [
@@ -170,7 +171,7 @@ function palette() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (!get().user || e.target.matches('input,textarea,select')) return;
+  if (!get().user || e.target.matches?.('input,textarea,select')) return;
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette(); }
   else if (!e.ctrlKey && !e.metaKey) {
     const k = e.key.toLowerCase();

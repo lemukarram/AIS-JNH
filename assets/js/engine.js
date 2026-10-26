@@ -77,6 +77,7 @@ function step(dt, quiet) {
   for (const c of cams) {
     if (c.reconnectUntil && simT > c.reconnectUntil) { c.reconnectUntil = 0; c.online = true; }
     if (!c.reconnectUntil && !quiet && c.i === 3 && R() < .0006) { c.online = false; c.reconnectUntil = simT + 4; }
+    if (c.replay?.ready && replayHook?.(c)) continue;   // baked tracks drive this camera (pipeline A)
     if (!c.online) continue;
     if (c.agents.length < 16 && R() < c.def.rate * hf * dt * .9) spawn(c);
     for (const a of c.agents) move(c, a, dt);
@@ -183,6 +184,8 @@ export function setAlertStatus(id, status) {
   a.status = status; get().kpi.alerts = get().alerts.filter(x => x.status === 'new').length; emit('alerts');
 }
 export const simTime = () => simT;
+let replayHook = null;
+export const setReplayHook = (fn) => { replayHook = fn; };
 
 export function addZone(camId, z) { const c = cams.find(x => x.def.id === camId); if (!c) return; c.def.zones.push(z); get().zones.push({ cam: camId, ...z }); emit('zones'); }
 export function setLine(camId, line) { const c = cams.find(x => x.def.id === camId); if (!c) return; c.def.line = line; c.in = 0; c.out = 0; c.agents.forEach(a => a.side = null); emit('zones'); }

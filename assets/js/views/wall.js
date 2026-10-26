@@ -60,7 +60,7 @@ export function mount(root) {
     const f = e.target.closest('[data-f]'); if (f) { const fl = get().flags; fl[f.dataset.f] = !fl[f.dataset.f]; f.setAttribute('aria-pressed', fl[f.dataset.f]); }
   });
   const key = (e) => {
-    if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey) return;
+    if (e.target.matches?.('input,textarea,select') || e.ctrlKey || e.metaKey) return;
     if (/^[1-5]$/.test(e.key)) { focus = +e.key - 1; if (layout === 'quad') layout = 'spot'; sync(); build(); }
     if (e.key.toLowerCase() === 'g') { layout = LAYOUTS[(LAYOUTS.indexOf(layout) + 1) % 4]; sync(); build(); }
     if (e.key.toLowerCase() === 'f') (document.fullscreenElement ? document.exitFullscreen() : $('.tile.hero', root)?.requestFullscreen?.());

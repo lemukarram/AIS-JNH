@@ -40,7 +40,7 @@ The demo runs fully without video (procedural simulation). To use sample footage
    `python tools/bake_tracks.py --videos source_videos --out assets/tracks` (resumable; `--force` to redo).
    Edit `tools/zones.json` first to define zones/tripwires per camera.
 
-> Status: the bake tool and the track schema are done. Replaying baked tracks over the `<video>` element in the browser is **not wired yet**; the UI currently always uses the simulation pipeline.
+> Pipeline A is wired: if `assets/video/camN.mp4` and `assets/tracks/camN.json` both exist, that camera plays the footage with boxes, trails, zones and counters replayed from the baked tracks (frame-synced via `requestVideoFrameCallback`, falling back to `currentTime`). Any camera missing either file, or whose video fails to load, silently stays on the simulation. Verified with a synthetic clip; not yet with real YOLO output.
 
 ## 6. Reset the demo
 - Presenter drawer (`P`) → **Reset data**: restarts the simulation and clears alerts.
