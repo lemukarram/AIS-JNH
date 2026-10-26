@@ -1,5 +1,5 @@
 import { get, on, set, pref } from '../store.js';
-import { t, n, applyDom } from '../i18n.js';
+import { t, n, applyDom, camName as cn } from '../i18n.js';
 import { getCams } from '../engine.js';
 import { drawTile } from '../render.js';
 import { $, $$, clock, setNum, visible } from '../ui.js';
@@ -49,7 +49,7 @@ export function mount(root) {
       el.addEventListener('dblclick', () => el.requestFullscreen?.());
     });
   }
-  const camName = (c) => t('camname.' + c.def.key);
+  const camName = (c) => cn(c.def);
   function sync() {
     $$('[data-l]', root).forEach(b => b.setAttribute('aria-pressed', b.dataset.l === layout));
     pref.write('layout', layout);

@@ -25,3 +25,6 @@ export function applyDom(root = document) {
   root.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
   root.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); el.setAttribute('aria-label', el.title); });
 }
+// Inline bilingual copy for screen-specific text: L('English', 'العربية')
+export const L = (en, ar) => (get().lang === 'ar' ? ar : en);
+export const camName = (def) => def.label || t('camname.' + def.key);

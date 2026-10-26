@@ -2,16 +2,17 @@ import { get, set, on, pref } from './store.js';
 import { loadLang, preload, t, applyDom } from './i18n.js';
 import { boot, raise, getPreset } from './engine.js';
 import { refreshColors } from './render.js';
-import { restore, logout, can } from './auth.js';
+import { restore, logout, can, canView } from './auth.js';
 import { icon } from './icons.js';
 import { $, $$, h, toast, modal, clock, esc, announce } from './ui.js';
 import { PRESETS } from './presets.js';
 
 const NAV = [
   { grp: 'nav.operate', items: [['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell']] },
-  { grp: 'nav.system', items: [['about', 'info']] },
+  { grp: 'nav.analyse', items: [['analytics', 'chart'], ['playback', 'play'], ['reports', 'report']] },
+  { grp: 'nav.system', items: [['cameras', 'cam'], ['settings', 'gear'], ['about', 'info']] },
 ];
-const VIEWS = { overview: () => import('./views/overview.js'), wall: () => import('./views/wall.js'), alerts: () => import('./views/alerts.js'), about: () => import('./views/about.js') };
+const VIEWS = { overview: () => import('./views/overview.js'), wall: () => import('./views/wall.js'), alerts: () => import('./views/alerts.js'), analytics: () => import('./views/analytics.js'), playback: () => import('./views/playback.js'), reports: () => import('./views/reports.js'), cameras: () => import('./views/cameras.js'), settings: () => import('./views/settings.js'), about: () => import('./views/about.js') };
 let unmountView = null, loginCleanup = null;
 const root = $('#root');
 
@@ -41,7 +42,7 @@ function applyBrand(b) {
 function switchLang() { const next = get().lang === 'ar' ? 'en' : 'ar'; loadLang(next).then(() => { if (get().user) shell(true); else showLogin(); }); }
 function switchTheme() { const th = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = th; pref.write('theme', th); refreshColors(); const b = $('#b-theme'); if (b) b.innerHTML = icon(th === 'dark' ? 'sun' : 'moon'); }
 
-function route() { const r = (location.hash.replace('#/', '') || 'overview').split('?')[0]; return VIEWS[r] ? r : 'overview'; }
+function route() { const r = (location.hash.replace('#/', '') || 'overview').split('?')[0]; return VIEWS[r] && (r === 'about' || canView(r)) ? r : 'overview'; }
 
 function shell(keepRoute) {
   loginCleanup?.(); unmountView?.(); unmountView = null;
@@ -49,7 +50,7 @@ function shell(keepRoute) {
   root.innerHTML = `
   <div id="app" data-rail="${pref.read('rail', 'e')}">
     <aside class="rail"><div class="brand">${b.logo ? `<img class="logo" src="${esc(b.logo)}" alt="">` : icon('mark', 'mark')}<span>${esc(b.name === 'SENTRA' ? t('app.name') : b.name)}</span></div>
-      <nav class="nav" aria-label="Main">${NAV.map(g => `<span class="label grp">${t(g.grp)}</span>${g.items.map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span>${id === 'alerts' ? '<b class="count num" id="n-al" hidden></b>' : ''}</a>`).join('')}`).join('')}</nav>
+      <nav class="nav" aria-label="Main">${NAV.map(g => `<span class="label grp">${t(g.grp)}</span>${g.items.filter(([id]) => id === 'about' || canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span>${id === 'alerts' ? '<b class="count num" id="n-al" hidden></b>' : ''}</a>`).join('')}`).join('')}</nav>
       <div class="rail-foot"><button class="btn primary" id="b-pilot">${icon('arrow', 'flip')}<span>${t('pilot.cta')}</span></button>
         <button class="btn ghost sm" id="b-rail" aria-label="${t('menu')}">${icon('menu')}</button></div></aside>
     <header class="top">
@@ -63,7 +64,7 @@ function shell(keepRoute) {
       <button class="iconbtn" id="b-out" data-i18n-title="signout">${icon('logout')}</button>
     </header>
     <main id="view" tabindex="-1"></main>
-    <nav class="bottomnav" aria-label="Main">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['about', 'info']].map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.cta').split(' ')[0]}</span></a></nav>
+    <nav class="bottomnav" aria-label="Main">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['analytics', 'chart']].filter(([id]) => canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.cta').split(' ')[0]}</span></a></nav>
   </div>`;
   applyDom(root);
   $('#b-theme').onclick = switchTheme; $('#b-lang').onclick = switchLang;
@@ -87,6 +88,7 @@ async function navigate() {
   document.title = `${t('nav.' + r)} — ${get().brand.name === 'SENTRA' ? t('app.name') : get().brand.name}`;
 }
 addEventListener('hashchange', navigate);
+document.addEventListener('rebrand', () => { const b = get().brand, nm = $('.brand span'); if (nm) nm.textContent = b.name === 'SENTRA' ? t('app.name') : b.name; const lg = $('.brand img.logo'); if (b.logo) { if (lg) lg.src = b.logo; else $('.brand .mark')?.replaceWith(h(`<img class="logo" src="${b.logo}" alt="">`)); } });
 
 // ---- live chrome: clock, alert badge, favicon, announcements ----
 on('tick', () => {
@@ -135,7 +137,7 @@ function presenter() {
     const b = e.target.closest('button'); if (!b) return;
     if (b.matches('[data-x]')) d.remove();
     if (b.dataset.p) { pref.write('preset', b.dataset.p); boot(b.dataset.p); d.remove(); shell(); toast(t('toast.preset')); }
-    if (b.dataset.t) raise(b.dataset.t);
+    if (b.dataset.t) raise(b.dataset.t, { force: true });
     if (b.dataset.s) { set({ speed: +b.dataset.s }, 'speed'); $$('[data-s]', d).forEach(x => x.setAttribute('aria-pressed', x === b)); }
     if (b.matches('[data-reset]')) { boot(get().preset); toast(t('toast.reset')); navigate(); }
     if (b.matches('[data-kiosk]')) { document.documentElement.requestFullscreen?.(); document.body.style.cursor = 'none'; setTimeout(() => document.body.style.cursor = '', 8000); }
@@ -145,7 +147,7 @@ function presenter() {
 // ---- command palette ----
 function palette() {
   const cmds = [
-    ...['overview', 'wall', 'alerts', 'about'].map(id => [t('cmd.go') + ' · ' + t('nav.' + id), () => location.hash = '#/' + id]),
+    ...['overview', 'wall', 'alerts', 'analytics', 'playback', 'reports', 'cameras', 'settings', 'about'].filter(id => id === 'about' || canView(id)).map(id => [t('cmd.go') + ' · ' + t('nav.' + id), () => location.hash = '#/' + id]),
     [t('theme'), switchTheme], [t('lang'), switchLang], [t('pilot.cta'), pilot],
     ...(can('presenter') ? [[t('pres.title'), presenter]] : []),
     ...Object.keys(PRESETS).map(id => [t('pres.industry') + ' · ' + t('preset.' + id), () => { pref.write('preset', id); boot(id); shell(); }]),

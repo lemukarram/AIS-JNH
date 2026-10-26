@@ -128,5 +128,10 @@
  "camname.waiting": "غرفة الانتظار",
  "camname.corridor": "الممر",
  "camname.er": "مدخل الطوارئ",
- "camname.parking": "المواقف"
+ "camname.parking": "المواقف",
+ "nav.analytics": "التحليلات",
+ "nav.playback": "التشغيل",
+ "nav.reports": "التقارير",
+ "nav.cameras": "الكاميرات والمناطق",
+ "nav.settings": "الإعدادات"
 }

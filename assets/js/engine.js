@@ -73,7 +73,7 @@ function step(dt, quiet) {
   simT += dt;
   const st = get();
   if (!quiet) st.now += dt * 1000;
-  const hf = hourCurve(simHour(), new Date(st.now).getDay()) * 1.6 * preset.baseRate + .25;
+  const hf = (get().traffic ?? 1) * hourCurve(simHour(), new Date(st.now).getDay()) * 1.6 * preset.baseRate + .25;
   for (const c of cams) {
     if (c.reconnectUntil && simT > c.reconnectUntil) { c.reconnectUntil = 0; c.online = true; }
     if (!c.reconnectUntil && !quiet && c.i === 3 && R() < .0006) { c.online = false; c.reconnectUntil = simT + 4; }
@@ -119,7 +119,7 @@ function move(c, a, dt) {
     const [x1, y1] = d.line.a, [x2, y2] = d.line.b;
     const side = Math.sign((x2 - x1) * (a.y - y1) - (y2 - y1) * (a.x - x1));
     if (a.side !== null && side !== a.side && side !== 0) {
-      if (side > 0) c.in++; else c.out++;
+      if (side < 0) c.in++; else c.out++;
       c.flash = .6;
     }
     a.side = side;
@@ -163,6 +163,7 @@ function rules() {
 const ready = (type, secs) => { if ((cooldown[type] || 0) > simT) return false; cooldown[type] = simT + secs; return true; };
 
 export function raise(type, o = {}) {
+  if (!o.force && get().modules?.[type] === false) return null;
   const sevMap = Object.fromEntries(preset.alerts.map(([t, s]) => [t, s]));
   const cam = o.cam || cams.find(c => c.def.key === ALERT_CAM[type]) || cams[0];
   const pt = cam.agents[Math.floor(R() * Math.max(1, cam.agents.length))];
@@ -182,3 +183,14 @@ export function setAlertStatus(id, status) {
   a.status = status; get().kpi.alerts = get().alerts.filter(x => x.status === 'new').length; emit('alerts');
 }
 export const simTime = () => simT;
+
+export function addZone(camId, z) { const c = cams.find(x => x.def.id === camId); if (!c) return; c.def.zones.push(z); get().zones.push({ cam: camId, ...z }); emit('zones'); }
+export function setLine(camId, line) { const c = cams.find(x => x.def.id === camId); if (!c) return; c.def.line = line; c.in = 0; c.out = 0; c.agents.forEach(a => a.side = null); emit('zones'); }
+
+export function addCamera({ name, scene = 'seating' }) {
+  const tpl = PRESETS.cafe.cameras.find(c => c.scene === scene) || PRESETS.cafe.cameras[2];
+  const id = 'CAM-0' + (cams.length + 1), key = 'custom' + (cams.length + 1);
+  const def = { ...tpl, id, key, label: name, zones: [], line: null, routes: tpl.routes.map(r => r.map(p => [...p])) };
+  const c = { def, i: cams.length, agents: [], in: 0, out: 0, fps: 27, latency: 130, bitrate: 2100, online: true, reconnectUntil: 0, queue: 0, flash: 0 };
+  cams.push(c); get().cams = cams; emit('zones'); return c;
+}

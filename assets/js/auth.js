@@ -8,8 +8,8 @@ export const ACCOUNTS = [
 ];
 export const CAN = {
   admin: ['*'],
-  manager: ['wall', 'alerts', 'overview', 'ack', 'presenter'],
-  viewer: ['wall', 'overview', 'alerts:read'],
+  manager: ['overview', 'wall', 'alerts', 'analytics', 'playback', 'reports', 'cameras:read', 'ack', 'presenter'],
+  viewer: ['overview', 'wall', 'alerts', 'analytics'],
 };
 export const can = (perm) => { const r = get().user?.role; const p = CAN[r] || []; return p.includes('*') || p.includes(perm); };
 
@@ -38,3 +38,6 @@ export function restore() {
   return false;
 }
 export function logout() { api('auth.php', { action: 'logout' }); try { sessionStorage.removeItem('sentra.user'); } catch {} set({ user: null }, 'user'); }
+
+// route access: admin everything; others need the route id or '<id>:read'
+export const canView = (id) => can(id) || can(id + ':read');

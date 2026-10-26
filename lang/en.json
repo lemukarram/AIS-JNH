@@ -128,5 +128,10 @@
  "camname.waiting": "Waiting room",
  "camname.corridor": "Corridor",
  "camname.er": "ER entrance",
- "camname.parking": "Parking"
+ "camname.parking": "Parking",
+ "nav.analytics": "Analytics",
+ "nav.playback": "Playback",
+ "nav.reports": "Reports",
+ "nav.cameras": "Cameras & zones",
+ "nav.settings": "Settings"
 }

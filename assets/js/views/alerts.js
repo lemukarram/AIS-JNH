@@ -1,5 +1,5 @@
 import { get, on } from '../store.js';
-import { t, n } from '../i18n.js';
+import { t, n, camName as cn } from '../i18n.js';
 import { setAlertStatus, getCams } from '../engine.js';
 import { drawTile } from '../render.js';
 import { $, $$, clock, esc, toast, downloadCSV } from '../ui.js';
@@ -34,7 +34,7 @@ export function mount(root) {
     d.innerHTML = `<header><span class="label">#${String(a.id).padStart(4, '0')}</span>${AL.sevTag(a.sev)}</header>
       <div class="clip"><canvas width="480" height="270"></canvas><i class="tick tl"></i><i class="tick br"></i><span class="mono clip-l">${t('al.clip')}</span></div>
       <div class="dbody"><h2>${esc(AL.title(a))}</h2>
-        <dl class="mono"><dt>${t('al.camera')}</dt><dd>${a.cam} · ${t('camname.' + a.camKey)}</dd><dt>${t('al.time')}</dt><dd>${clock(a.ts)}</dd><dt>${t('al.conf')}</dt><dd>${a.conf}%</dd><dt>${t('al.rule')}</dt><dd>${a.type}.rule · v1</dd></dl>
+        <dl class="mono"><dt>${t('al.camera')}</dt><dd>${a.cam} · ${cn(getCams().find(c => c.def.id === a.cam).def)}</dd><dt>${t('al.time')}</dt><dd>${clock(a.ts)}</dd><dt>${t('al.conf')}</dt><dd>${a.conf}%</dd><dt>${t('al.rule')}</dt><dd>${a.type}.rule · v1</dd></dl>
         <div class="aact"><button class="btn sm primary" data-a="ack" ${cant || a.status !== 'new' ? 'disabled' : ''}>${t('al.ack')}</button>
           <button class="btn sm" data-a="res" ${cant || a.status === 'resolved' ? 'disabled' : ''}>${t('al.resolve')}</button>
           <button class="btn sm" data-a="esc" ${cant ? 'disabled' : ''}>${t('al.escalate')}</button></div></div>`;
