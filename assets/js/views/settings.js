@@ -6,6 +6,7 @@ import { audit, auditLog } from '../audit.js';
 import { ACCOUNTS, CAN } from '../auth.js';
 import { PRESETS, ALERT_TYPES } from '../presets.js';
 import { icon } from '../icons.js';
+import { get as apiGet, hasBackend } from '../api.js';
 
 const TABS = [['brand', 'Branding', 'الهوية البصرية'], ['venue', 'Venue', 'الموقع'], ['ai', 'Detection & rules', 'الاكتشاف والقواعد'], ['users', 'Users & roles', 'المستخدمون والأدوار'], ['integ', 'Integrations', 'التكاملات'], ['health', 'System health', 'صحة النظام'], ['audit', 'Audit log', 'سجل التدقيق'], ['leads', 'Leads', 'العملاء المحتملون']];
 
@@ -69,8 +70,9 @@ export function mount(root) {
         body.innerHTML = `<div class="health">${m(L('GPU / NPU temp', 'حرارة المعالج الرسومي / العصبي'), Math.round(58 + Math.sin(ph / 7) * 4), '°C', .6)}${m(L('CPU', 'المعالج'), Math.round(34 + Math.sin(ph / 5) * 8), '%', .4)}${m(L('Inference FPS', 'إطارات الاستدلال'), k.fps || 0, ' fps', (k.fps || 0) / 40)}${m(L('Latency', 'التأخير'), k.latency || 0, ' ms', (k.latency || 0) / 300)}${m(L('Queue depth', 'عمق الطابور'), Math.max(0, Math.round(2 + Math.sin(ph / 3) * 2)), '', .2)}${m(L('Storage', 'التخزين'), '412', ' / 2000 GB', .21)}${m(L('Cameras online', 'كاميرات متصلة'), `${k.cams}/${k.camsTotal}`, '', (k.cams || 0) / (k.camsTotal || 1))}${m(L('Uptime', 'مدة التشغيل'), '14d 06h', '', .9)}</div>`; };
       draw(); timer = setInterval(() => tab === 'health' && draw(), 2000);
     },
-    audit() {
-      const log = auditLog();
+    async audit() {
+      let log = auditLog();
+      if (hasBackend()) { const r = await apiGet('audit.php'); if (r?.audit) log = r.audit.map(e => ({ ts: e.ts * 1000, user: e.user, action: e.action, detail: e.detail })); }
       body.innerHTML = `<div class="row" style="padding:12px 16px"><span class="label">${L('Recorded by the app', 'يسجّله التطبيق')}</span><button class="btn sm" id="a-csv">CSV</button></div>
         <table class="tbl"><thead><tr><th>${L('Time', 'الوقت')}</th><th>${L('User', 'المستخدم')}</th><th>${L('Action', 'الإجراء')}</th><th>${L('Detail', 'التفاصيل')}</th></tr></thead><tbody>${log.length ? log.map(e => `<tr><td class="mono">${fmtDateTime(new Date(e.ts))}</td><td class="mono">${esc(e.user)}</td><td class="mono">${esc(e.action)}</td><td>${esc(e.detail)}</td></tr>`).join('') : `<tr><td colspan="4" class="empty">${t('al.empty')}</td></tr>`}</tbody></table>`;
       $('#a-csv', body)?.addEventListener('click', () => downloadCSV('audit.csv', [[L('Time', 'الوقت'), L('User', 'المستخدم'), L('Action', 'الإجراء'), L('Detail', 'التفاصيل')], ...log.map(e => [new Date(e.ts).toISOString(), e.user, e.action, e.detail])]));
