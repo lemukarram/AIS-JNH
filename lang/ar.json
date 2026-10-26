@@ -138,5 +138,6 @@
  "nav.short.wall": "المراقبة",
  "nav.short.alerts": "التنبيهات",
  "nav.short.overview": "الرئيسية",
- "nav.short.analytics": "التحليلات"
+ "nav.short.analytics": "التحليلات",
+ "login.rate": "محاولات فاشلة كثيرة. يُرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى."
 }

@@ -20,7 +20,7 @@ export async function login(email, pw) {
   const remote = await api('auth.php', { action: 'login', email, password: pw });
   if (remote) {
     if (remote.status === 200 && remote.data.user) { setCsrf(remote.data.csrf); return finish(remote.data.user); }
-    return false;
+    return remote.status === 429 ? 'rate' : false;
   }
   const a = ACCOUNTS.find(x => x.email === email.trim().toLowerCase() && x.pw === pw);
   return a ? finish({ email: a.email, role: a.role, name: a.name }) : false;

@@ -78,6 +78,20 @@ function require_role(array $roles): array
     return $u;
 }
 
+// Failed-attempt limiter: rate_blocked() checks, rate_hit() records (used so successful logins never count).
+function rate_blocked(string $action, array $limit): bool
+{
+    [$max, $window] = $limit;
+    $st = db()->prepare('SELECT COUNT(*) FROM rate_hits WHERE action = ? AND ip = ? AND ts > ?');
+    $st->execute([$action, $_SERVER['REMOTE_ADDR'] ?? '0', time() - $window]);
+    return (int) $st->fetchColumn() >= $max;
+}
+
+function rate_hit(string $action): void
+{
+    db()->prepare('INSERT INTO rate_hits (action, ip, ts) VALUES (?,?,?)')->execute([$action, $_SERVER['REMOTE_ADDR'] ?? '0', time()]);
+}
+
 // Fixed-window rate limit keyed by action + IP. Returns false when the limit is exceeded.
 function rate_ok(string $action, array $limit): bool
 {

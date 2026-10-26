@@ -138,5 +138,6 @@
  "nav.short.wall": "Live",
  "nav.short.alerts": "Alerts",
  "nav.short.overview": "Overview",
- "nav.short.analytics": "Analytics"
+ "nav.short.analytics": "Analytics",
+ "login.rate": "Too many failed attempts. Please wait a few minutes and try again."
 }

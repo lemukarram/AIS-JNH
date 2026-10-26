@@ -10,7 +10,7 @@ return [
     'DB_PASS'       => '',
     'LEAD_EMAIL'    => '',                   // e.g. sales@yourcompany.com — leads are also emailed via mail()
     'SEED_PASSWORD' => 'Sentra#2026',        // password for the three demo accounts
-    'RATE_LOGIN'    => [8, 600],             // max attempts, per seconds, per IP
+    'RATE_LOGIN'    => [10, 600],            // max FAILED logins per seconds per IP (successful logins never count)
     'RATE_LEAD'     => [5, 3600],
     'SESSION_NAME'  => 'sentra_sid',
 ];

@@ -6,11 +6,12 @@ $b = body();
 $action = $b['action'] ?? '';
 
 if ($action === 'login') {
-    if (!rate_ok('login', cfg('RATE_LOGIN'))) json_out(['error' => 'rate'], 429);
+    if (rate_blocked('login', cfg('RATE_LOGIN'))) json_out(['error' => 'rate'], 429);
     $st = db()->prepare('SELECT * FROM users WHERE email = ?');
     $st->execute([strtolower(trim((string) ($b['email'] ?? '')))]);
     $u = $st->fetch();
     if (!$u || !password_verify((string) ($b['password'] ?? ''), $u['pass_hash'])) {
+        rate_hit('login');
         usleep(250000);
         json_out(['error' => 'invalid'], 401);
     }

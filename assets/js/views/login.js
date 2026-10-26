@@ -3,7 +3,6 @@ import { getCams } from '../engine.js';
 import { drawTile } from '../render.js';
 import { login, ACCOUNTS } from '../auth.js';
 import { icon } from '../icons.js';
-import { hasBackend } from '../api.js';
 import { $, $$ } from '../ui.js';
 
 export function mount(root, done) {
@@ -25,7 +24,7 @@ export function mount(root, done) {
         <p class="err" id="err" role="alert" hidden></p>
         <button class="btn primary big" type="submit"><span data-i18n="login.submit"></span> ${icon('arrow', 'flip')}</button>
         <div class="demo"><span class="label" data-i18n="login.demo"></span>
-          <div class="chips">${ACCOUNTS.map(a => `<button type="button" class="chip" data-e="${a.email}" data-p="${a.role === 'admin' && hasBackend() ? '' : a.pw}"><b data-i18n="role.${a.role}"></b><span class="mono">${a.email}</span></button>`).join('')}</div>
+          <div class="chips">${ACCOUNTS.map(a => `<button type="button" class="chip" data-e="${a.email}" data-p="${a.pw}"><b data-i18n="role.${a.role}"></b><span class="mono">${a.email}</span></button>`).join('')}</div>
         </div>
       </form>
     </section>
@@ -48,7 +47,7 @@ export function mount(root, done) {
   $('#lf').addEventListener('submit', async (e) => {
     e.preventDefault();
     const ok = await login($('#em').value, $('#pw').value);
-    if (!ok) { const er = $('#err'); er.textContent = t('login.err'); er.hidden = false; $('.login-form form').animate([{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 200 }); return; }
+    if (!ok) { const er = $('#err'); er.textContent = ok === 'rate' ? t('login.rate') : t('login.err'); er.hidden = false; $('.login-form form').animate([{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 200 }); return; }
     cancelAnimationFrame(raf); done();
   });
   return () => cancelAnimationFrame(raf);
