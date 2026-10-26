@@ -52,5 +52,33 @@ Passwords are hashed (`password_hash`), queries use prepared statements, session
 ## 8. Local development
 `node tools/serve.js 8080` serves the front-end without PHP (login falls back to built-in demo accounts, leads and audit stay in the browser). With PHP: `php -S localhost:8080` then open `/install.php`.
 
+## 9. Deploy over SSH to a sub-folder of an existing site (e.g. `loopstech.com/ais-jnh`)
+Used for the live demo at `https://loopstech.com/ais-jnh/`. The main site's web root stays untouched; the app lives in its own `ais-jnh/` folder (its own `.htaccess` and `data/`).
+
+Placeholders: `SSH_PORT`, `USER`, `HOST`, and `WEBROOT` = the site's `public_html` (here `domains/loopstech.com/public_html`). Use SSH **keys**, never passwords in scripts or chat.
+
+1. **Check the server** (PHP 7.4–8.3 with `pdo_sqlite`, `mbstring`; the main site's `.htaccess` must not have a catch-all rewrite):
+   ```bash
+   ssh -p SSH_PORT USER@HOST "cd WEBROOT && php -v | head -1 && php -m | grep -i -E 'pdo|sqlite|mbstring' && cat .htaccess"
+   ```
+2. **Package** the committed code (no `.git`, no dev files) and **upload**:
+   ```bash
+   git archive --format=tar.gz -o /tmp/ais-jnh.tar.gz HEAD
+   scp -P SSH_PORT /tmp/ais-jnh.tar.gz USER@HOST:~/
+   ```
+3. **Extract** into a *new* folder (never into the web root itself) and make `data/` writable:
+   ```bash
+   ssh -p SSH_PORT USER@HOST "cd WEBROOT && mkdir ais-jnh && tar -xzf ~/ais-jnh.tar.gz -C ais-jnh && chmod 775 ais-jnh/data && rm ~/ais-jnh.tar.gz"
+   ```
+4. **Install**: open `https://your-site.com/ais-jnh/install.php`, create the database, then **delete `install.php`** (or `rm ais-jnh/install.php` over SSH).
+5. **Rotate the admin password** — the three demo accounts share one password and the login page shows it on purpose, but the admin account can read leads. On the server:
+   ```bash
+   ssh -p SSH_PORT USER@HOST "cd WEBROOT/ais-jnh && php -r 'require \"app/bootstrap.php\"; db()->prepare(\"UPDATE users SET pass_hash=? WHERE email=?\")->execute([password_hash(\$argv[1], PASSWORD_DEFAULT), \"admin@demo.local\"]);' 'NEW-STRONG-PASSWORD'"
+   ```
+6. **Update** later: repeat steps 2–3 into a temp folder, copy over everything except `ais-jnh/data/`, so the database, leads and audit log are kept.
+7. **Remove** the demo: `rm -rf WEBROOT/ais-jnh` (nothing else on the site is affected).
+
+Notes: if the main site is a Git checkout, `ais-jnh/` shows up as untracked there — don't run `git clean -fd` in the web root, or it will delete the demo. Back up `ais-jnh/data/sentra.sqlite` if the leads matter.
+
 ## Known limitations
 See the final summary in the repository's latest commit message / README status section.
