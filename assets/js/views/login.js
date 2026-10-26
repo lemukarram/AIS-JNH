@@ -3,6 +3,7 @@ import { getCams } from '../engine.js';
 import { drawTile } from '../render.js';
 import { login, ACCOUNTS } from '../auth.js';
 import { icon } from '../icons.js';
+import { hasBackend } from '../api.js';
 import { $, $$ } from '../ui.js';
 
 export function mount(root, done) {
@@ -24,7 +25,7 @@ export function mount(root, done) {
         <p class="err" id="err" role="alert" hidden></p>
         <button class="btn primary big" type="submit"><span data-i18n="login.submit"></span> ${icon('arrow', 'flip')}</button>
         <div class="demo"><span class="label" data-i18n="login.demo"></span>
-          <div class="chips">${ACCOUNTS.map(a => `<button type="button" class="chip" data-e="${a.email}" data-p="${a.pw}"><b data-i18n="role.${a.role}"></b><span class="mono">${a.email}</span></button>`).join('')}</div>
+          <div class="chips">${ACCOUNTS.map(a => `<button type="button" class="chip" data-e="${a.email}" data-p="${a.role === 'admin' && hasBackend() ? '' : a.pw}"><b data-i18n="role.${a.role}"></b><span class="mono">${a.email}</span></button>`).join('')}</div>
         </div>
       </form>
     </section>
