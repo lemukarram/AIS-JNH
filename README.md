@@ -11,4 +11,6 @@ Deploy: [README_DEPLOY.md](README_DEPLOY.md) · Sales script: [DEMO_SCRIPT.md](D
 ## Run locally (no PHP needed for the front-end)
     node tools/serve.js 8080
 
+Arabic (RTL) is the default language for new visitors; English is one click away (top bar). Dates are Gregorian with Latin digits, plus a Hijri date in the Arabic top bar; the clock is 12-hour with ص/م.
+
 Demo logins (password `Sentra#2026`): admin@demo.local, manager@demo.local, viewer@demo.local

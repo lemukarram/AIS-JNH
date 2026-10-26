@@ -15,6 +15,7 @@ export function announce(msg) { $('#live').textContent = msg; }
 
 export function clock(ts, secs = true) {
   const d = new Date(ts);
+  if (get().lang === 'ar') return new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit', ...(secs ? { second: '2-digit' } : {}), hour12: true }).format(d);
   const p = (v) => String(v).padStart(2, '0');
   return `${p(d.getHours())}:${p(d.getMinutes())}${secs ? ':' + p(d.getSeconds()) : ''}`;
 }

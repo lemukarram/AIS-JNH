@@ -3,7 +3,7 @@ const door = (x1, y1, x2, y2) => ({ a: [x1, y1], b: [x2, y2] });
 const R = (x, y, w, h, name, kind = 'zone') => ({ x, y, w, h, name, kind });
 
 const cafe = {
-  id: 'cafe', venue: 'Qahwa & Co. — Olaya Branch', capacity: 64, baseRate: 1,
+  id: 'cafe', venue: 'Qahwa & Co. — Olaya Branch', venueAr: 'قهوة آند كو — فرع العليا', capacity: 64, baseRate: 1,
   kpis: ['inside', 'footfall', 'queue', 'wait', 'occupancy', 'dwell', 'alerts', 'cams'],
   cameras: [
     { id: 'CAM-01', key: 'entrance', scene: 'door', line: door(.1, .55, .9, .55), spawn: [[.5, 1.02]], exit: [[.5, 1.05]],
@@ -26,7 +26,7 @@ const cafe = {
 };
 
 const restaurant = {
-  ...cafe, id: 'restaurant', venue: 'Mijana Grill — Corniche', capacity: 120,
+  ...cafe, id: 'restaurant', venue: 'Mijana Grill — Corniche', venueAr: 'مجانة غريل — الكورنيش', capacity: 120,
   cameras: [
     { ...cafe.cameras[0], id: 'CAM-01', key: 'entrance' },
     { ...cafe.cameras[2], id: 'CAM-02', key: 'dining', routes: [[[.5, .85], [.2, .4, 60000], [.5, .85], [.5, 1.05]], [[.5, .85], [.75, .35, 80000], [.5, .85], [.5, 1.05]], [[.5, .85], [.5, .2, 50000], [.5, .85], [.5, 1.05]]], rate: .4 },
@@ -39,7 +39,7 @@ const restaurant = {
 };
 
 const hospital = {
-  id: 'hospital', venue: 'Al Noor Medical Centre', capacity: 220, baseRate: 1.4,
+  id: 'hospital', venue: 'Al Noor Medical Centre', venueAr: 'مركز النور الطبي', capacity: 220, baseRate: 1.4,
   kpis: ['inside', 'footfall', 'waiting', 'wait', 'occupancy', 'restricted', 'alerts', 'cams'],
   cameras: [
     { id: 'CAM-01', key: 'lobby', scene: 'door', line: door(.1, .6, .9, .6), spawn: [[.5, 1.02]], exit: [[.5, 1.05]],

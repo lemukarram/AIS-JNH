@@ -1,4 +1,4 @@
-import { t } from '../i18n.js';
+import { t, L, ltr } from '../i18n.js';
 import { clock, esc, toast } from '../ui.js';
 import { setAlertStatus } from '../engine.js';
 import { can } from '../auth.js';
@@ -14,7 +14,7 @@ export function row(a, { actions = true } = {}) {
     <div class="abody">
       <div class="ahead">${sevTag(a.sev)}<span class="mono dim">${clock(a.ts)}</span></div>
       <strong>${esc(title(a))}</strong>
-      <span class="dim mono">${a.cam} · ${a.conf}%${a.detail?.len ? ' · n=' + a.detail.len : ''}</span>
+      <span class="dim mono" dir="ltr">${a.cam} · ${a.conf}%</span>${a.detail?.len ? `<span class="dim small">${L('Count', 'العدد')}: ${a.detail.len}</span>` : ''}
       ${actions ? `<div class="aact">
         <button class="btn sm" data-act="ack" ${cant || a.status !== 'new' ? 'disabled' : ''}>${icon('check')}${t('al.ack')}</button>
         <button class="btn sm" data-act="esc" ${cant ? 'disabled' : ''}>${icon('flag')}${t('al.escalate')}</button>

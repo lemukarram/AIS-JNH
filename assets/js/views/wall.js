@@ -1,5 +1,5 @@
 import { get, on, set, pref } from '../store.js';
-import { t, n, applyDom, camName as cn } from '../i18n.js';
+import { t, n, L, applyDom, camName as cn } from '../i18n.js';
 import { getCams } from '../engine.js';
 import { drawTile } from '../render.js';
 import { $, $$, clock, setNum, visible } from '../ui.js';
@@ -15,7 +15,7 @@ export function mount(root) {
   <div class="wall">
     <div class="wall-main">
       <div class="wall-bar">
-        <div class="seg" role="group" aria-label="Layout">${LAYOUTS.map(l => `<button class="btn sm" data-l="${l}" aria-pressed="${l === layout}">${t('wall.layout.' + (l === 'spot' ? 'spot' : l))}</button>`).join('')}</div>
+        <div class="seg" role="group" aria-label="${L('Layout', 'التخطيط')}">${LAYOUTS.map(l => `<button class="btn sm" data-l="${l}" aria-pressed="${l === layout}">${t('wall.layout.' + (l === 'spot' ? 'spot' : l))}</button>`).join('')}</div>
         <div class="seg" role="group">${['boxes', 'trails', 'zones', 'heat', 'blur', 'skeleton'].map(k => `<button class="btn sm" data-f="${k}" aria-pressed="${get().flags[k]}">${t('wall.' + k)}</button>`).join('')}</div>
         <span class="grow"></span><span class="kbd">1–5</span><span class="kbd">G</span><span class="kbd">F</span>
       </div>
@@ -39,8 +39,8 @@ export function mount(root) {
         <i class="tick tl"></i><i class="tick tr"></i><i class="tick bl"></i><i class="tick br"></i>
         <div class="tile-top"><span class="tname"><span class="led"></span><b class="mono">${c.def.id}</b> ${camName(c)}</span>
           <span class="tmeta mono"><span class="badge-live">${t('cam.live')}</span><span data-m="fps"></span><span data-m="lat"></span><span class="hide-m" data-m="br"></span></span></div>
-        <div class="tile-hud mono">YOLOv8n · <span data-m="ms"></span> ms/f</div>
-        <div class="tile-ts mono" data-m="ts"></div>
+        <div class="tile-hud mono" dir="ltr">YOLOv8n · <span data-m="ms"></span> ms/f</div>
+        <div class="tile-ts mono" dir="ltr" data-m="ts"></div>
         <div class="tile-bot mono"><span>${t('wall.in')} <b data-m="in">0</b></span><span>${t('wall.out')} <b data-m="out">0</b></span><span>${t('wall.now')} <b data-m="now">0</b></span></div>
       </figure>`;
     }).join('');
@@ -100,10 +100,10 @@ export function mount(root) {
       drawTile($('canvas', el), c);
       const m = (k) => $(`[data-m=${k}]`, el);
       m('fps').textContent = c.online ? `${c.fps} ${t('fps')}` : '—';
-      m('lat').textContent = c.online ? `${c.latency} ms` : '—';
-      m('br').textContent = `${(c.bitrate / 1000).toFixed(1)} Mbps`;
+      m('lat').textContent = c.online ? `${c.latency} ${L('ms', 'مللي ث')}` : '—';
+      m('br').textContent = `${(c.bitrate / 1000).toFixed(1)} ${L('Mbps', 'م.ب/ث')}`;
       m('ms').textContent = (1000 / c.fps * .62).toFixed(1);
-      m('ts').textContent = `${new Date(get().now).toISOString().slice(0, 10)} ${clock(get().now)} · ${c.def.id}`;
+      m('ts').textContent = new Date(get().now).toISOString().slice(0, 10) + ' ' + new Date(get().now).toTimeString().slice(0, 8) + ' · ' + c.def.id;
       setNum(m('in'), c.in); setNum(m('out'), c.out); setNum(m('now'), c.agents.filter(a => a.cls === 'person').length);
       const led = $('.led', el); led.className = 'led' + (c.online ? '' : ' warn');
       el.classList.toggle('alerting', !!(c.lock && c.lock.until > performance.now() / 1000 - 1e9 && c.flash > .4));

@@ -1,5 +1,5 @@
 import { get, set, pref, on } from '../store.js';
-import { t, n, L } from '../i18n.js';
+import { t, n, L, venueName, fmtDateTime, days as dayWord } from '../i18n.js';
 import { getPreset, boot, hourCurve } from '../engine.js';
 import { $, $$, esc, toast, clock, downloadCSV } from '../ui.js';
 import { audit, auditLog } from '../audit.js';
@@ -20,21 +20,21 @@ export function mount(root) {
     brand() {
       const b = get().brand;
       body.innerHTML = `<div class="form"><div class="field"><label class="label" for="b-name">${L('Product name', 'اسم المنتج')}</label><input id="b-name" value="${esc(b.name)}"></div>
-        <div class="field"><label class="label" for="b-venue">${L('Venue name', 'اسم الموقع')}</label><input id="b-venue" value="${esc(P().venue)}"></div>
+        <div class="field"><label class="label" for="b-venue">${L('Venue name', 'اسم الموقع')}</label><input id="b-venue" value="${esc(venueName(P()))}"></div>
         <div class="field"><label class="label" for="b-col">${L('Accent colour', 'اللون المميز')}</label><div class="row"><input id="b-col" type="color" value="${b.accent}" class="colorin"><span class="mono">${b.accent}</span><button class="btn sm" id="b-reset">${L('Reset', 'استعادة')}</button></div></div>
         <div class="field"><label class="label" for="b-logo">${L('Logo (PNG/SVG)', 'الشعار')}</label><input id="b-logo" type="file" accept="image/png,image/svg+xml,image/jpeg"></div>
         <p class="dim small">${L('Changes apply instantly across the app — rebrand for each prospect in seconds.', 'تُطبّق التغييرات فوراً في كل الشاشات — أعد التسمية لكل عميل في ثوانٍ.')}</p></div>`;
       const save = () => { pref.write('brand', { name: b.name, accent: b.accent, logo: b.logo }); };
       const refresh = () => { document.dispatchEvent(new CustomEvent('rebrand')); };
       $('#b-name', body).oninput = (e) => { b.name = e.target.value || 'SENTRA'; save(); refresh(); };
-      $('#b-venue', body).oninput = (e) => { P().venue = e.target.value; refresh(); };
+      $('#b-venue', body).oninput = (e) => { P().venue = P().venueAr = e.target.value; refresh(); };
       $('#b-col', body).oninput = (e) => { b.accent = e.target.value; document.documentElement.style.setProperty('--signal', b.accent); const lum = parseInt(b.accent.slice(1, 3), 16) * .3 + parseInt(b.accent.slice(3, 5), 16) * .6 + parseInt(b.accent.slice(5), 16) * .1; document.documentElement.style.setProperty('--signal-ink', lum > 120 ? '#10140A' : '#FFFFFF'); $('.mono', body).textContent = b.accent; save(); audit('brand.color', b.accent); };
       $('#b-reset', body).onclick = () => { b.accent = '#C6F432'; document.documentElement.style.setProperty('--signal', b.accent); document.documentElement.style.setProperty('--signal-ink', '#10140A'); save(); views.brand(); };
       $('#b-logo', body).onchange = (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { b.logo = r.result; save(); refresh(); audit('brand.logo', f.name); toast(L('Logo updated', 'تم تحديث الشعار')); }; r.readAsDataURL(f); };
     },
     venue() {
       body.innerHTML = `<div class="form"><span class="label">${L('Industry preset', 'قطاع النشاط')}</span><div class="seg">${Object.keys(PRESETS).map(id => `<button class="btn" data-p="${id}" aria-pressed="${id === get().preset}">${t('preset.' + id)}</button>`).join('')}</div>
-        <dl class="mono"><dt>${L('Venue', 'الموقع')}</dt><dd>${esc(P().venue)}</dd><dt>${L('Capacity', 'السعة')}</dt><dd>${n(P().capacity)}</dd><dt>${L('Cameras', 'الكاميرات')}</dt><dd>${get().cams.length}</dd><dt>${L('Timezone', 'المنطقة الزمنية')}</dt><dd>Asia/Riyadh (UTC+3)</dd></dl></div>`;
+        <dl class="mono"><dt>${L('Venue', 'الموقع')}</dt><dd>${esc(venueName(P()))}</dd><dt>${L('Capacity', 'السعة')}</dt><dd>${n(P().capacity)}</dd><dt>${L('Cameras', 'الكاميرات')}</dt><dd>${get().cams.length}</dd><dt>${L('Timezone', 'المنطقة الزمنية')}</dt><dd>Asia/Riyadh (UTC+3)</dd></dl></div>`;
       body.onclick = (e) => { const b = e.target.closest('[data-p]'); if (b) { pref.write('preset', b.dataset.p); boot(b.dataset.p); audit('preset', b.dataset.p); toast(t('toast.preset')); views.venue(); } };
     },
     ai() {
@@ -43,7 +43,7 @@ export function mount(root) {
         <div class="field"><label class="label" for="s-t">${L('Simulated traffic level', 'مستوى الحركة المحاكاة')}: <b class="mono" id="s-tv">${Math.round((g.traffic ?? 1) * 100)}%</b></label><input type="range" id="s-t" min="30" max="250" value="${Math.round((g.traffic ?? 1) * 100)}"></div>
         <div class="field"><label class="label">${L('Detection modules', 'وحدات الاكتشاف')}</label><div class="mods">${P().alerts.map(([a]) => `<label class="chk"><input type="checkbox" data-m="${a}" ${g.modules[a] === false ? '' : 'checked'}> ${t('a.' + a)}</label>`).join('')}</div></div>
         <label class="chk"><input type="checkbox" id="s-blur" ${g.flags.blur ? 'checked' : ''}> ${L('Blur faces by default (privacy)', 'طمس الوجوه افتراضياً (الخصوصية)')}</label>
-        <div class="field"><label class="label">${L('Retention', 'مدة الاحتفاظ')}</label><select class="sel"><option>7 ${L('days', 'أيام')}</option><option selected>30 ${L('days', 'يوم')}</option><option>90 ${L('days', 'يوم')}</option></select></div>
+        <div class="field"><label class="label">${L('Retention', 'مدة الاحتفاظ')}</label><select class="sel"><option>${dayWord(7)}</option><option selected>${dayWord(30)}</option><option>${dayWord(90)}</option></select></div>
         <div class="field"><label class="label">${L('Notification channels (UI only)', 'قنوات الإشعار (واجهة فقط)')}</label><div class="mods">${['Email', 'SMS', 'WhatsApp', 'Webhook'].map(c => `<label class="chk"><input type="checkbox" ${c === 'Email' ? 'checked' : ''}> ${c}</label>`).join('')}</div></div>
         <div class="field"><label class="label">${L('Model', 'النموذج')}</label><select class="sel" disabled><option>YOLOv8n · person/vehicle/bag</option></select></div>
         <p class="dim small">${L('No facial recognition or biometric identification. Counts and behaviour only.', 'لا تعرّف على الوجوه ولا بيانات حيوية. عدّ وسلوك فقط.')}</p></div>`;
@@ -72,15 +72,15 @@ export function mount(root) {
     audit() {
       const log = auditLog();
       body.innerHTML = `<div class="row" style="padding:12px 16px"><span class="label">${L('Recorded by the app', 'يسجّله التطبيق')}</span><button class="btn sm" id="a-csv">CSV</button></div>
-        <table class="tbl"><thead><tr><th>${L('Time', 'الوقت')}</th><th>${L('User', 'المستخدم')}</th><th>${L('Action', 'الإجراء')}</th><th>${L('Detail', 'التفاصيل')}</th></tr></thead><tbody>${log.length ? log.map(e => `<tr><td class="mono">${new Date(e.ts).toLocaleString('en-GB')}</td><td class="mono">${esc(e.user)}</td><td class="mono">${esc(e.action)}</td><td>${esc(e.detail)}</td></tr>`).join('') : `<tr><td colspan="4" class="empty">${t('al.empty')}</td></tr>`}</tbody></table>`;
-      $('#a-csv', body)?.addEventListener('click', () => downloadCSV('audit.csv', [['time', 'user', 'action', 'detail'], ...log.map(e => [new Date(e.ts).toISOString(), e.user, e.action, e.detail])]));
+        <table class="tbl"><thead><tr><th>${L('Time', 'الوقت')}</th><th>${L('User', 'المستخدم')}</th><th>${L('Action', 'الإجراء')}</th><th>${L('Detail', 'التفاصيل')}</th></tr></thead><tbody>${log.length ? log.map(e => `<tr><td class="mono">${fmtDateTime(new Date(e.ts))}</td><td class="mono">${esc(e.user)}</td><td class="mono">${esc(e.action)}</td><td>${esc(e.detail)}</td></tr>`).join('') : `<tr><td colspan="4" class="empty">${t('al.empty')}</td></tr>`}</tbody></table>`;
+      $('#a-csv', body)?.addEventListener('click', () => downloadCSV('audit.csv', [[L('Time', 'الوقت'), L('User', 'المستخدم'), L('Action', 'الإجراء'), L('Detail', 'التفاصيل')], ...log.map(e => [new Date(e.ts).toISOString(), e.user, e.action, e.detail])]));
     },
     async leads() {
       let leads = pref.read('leads', []);
       try { const r = await fetch('api/leads.php', { credentials: 'same-origin' }); if (r.ok && (r.headers.get('content-type') || '').includes('json')) leads = (await r.json()).leads || leads; } catch {}
       body.innerHTML = `<div class="row" style="padding:12px 16px"><span class="label">${n(leads.length)} ${L('leads', 'عميل محتمل')}</span><button class="btn sm" id="l-csv">CSV</button></div>
         <table class="tbl"><thead><tr><th>${L('Name', 'الاسم')}</th><th>${L('Venue', 'الموقع')}</th><th class="hide-m">${L('Type', 'النوع')}</th><th class="hide-m">${L('Cameras', 'الكاميرات')}</th><th>${L('Contact', 'التواصل')}</th></tr></thead><tbody>${leads.length ? leads.map(l => `<tr><td>${esc(l.name)}</td><td>${esc(l.venue || '')}</td><td class="hide-m">${esc(l.type || '')}</td><td class="mono hide-m">${esc(l.cams || '')}</td><td class="mono">${esc(l.email || '')}<br>${esc(l.phone || '')}</td></tr>`).join('') : `<tr><td colspan="5" class="empty">${t('al.empty')}</td></tr>`}</tbody></table>`;
-      $('#l-csv', body)?.addEventListener('click', () => downloadCSV('leads.csv', [['name', 'venue', 'type', 'cameras', 'phone', 'email', 'notes'], ...leads.map(l => [l.name, l.venue, l.type, l.cams, l.phone, l.email, l.notes || ''])]));
+      $('#l-csv', body)?.addEventListener('click', () => downloadCSV('leads.csv', [[L('Name', 'الاسم'), L('Venue', 'الموقع'), L('Type', 'النوع'), L('Cameras', 'الكاميرات'), L('Phone', 'الجوال'), L('Email', 'البريد'), L('Notes', 'ملاحظات')], ...leads.map(l => [l.name, l.venue, l.type, l.cams, l.phone, l.email, l.notes || ''])]));
     },
   };
   const open = (id) => { clearInterval(timer); tab = id; body.onclick = body.onchange = null; $$('[data-tab]', root).forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id)); views[id](); };

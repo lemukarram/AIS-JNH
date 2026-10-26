@@ -1,5 +1,5 @@
 import { get, on } from '../store.js';
-import { t, n, applyDom } from '../i18n.js';
+import { t, n, applyDom, venueName, zoneName, L } from '../i18n.js';
 import { getPreset, hourlyFor, hourCurve } from '../engine.js';
 import { $, $$, setNum, sparkline, clock, esc } from '../ui.js';
 import * as AL from './alertlib.js';
@@ -12,15 +12,15 @@ export function mount(root) {
   const hist = {}; // rolling sparkline series per kpi
   root.innerHTML = `
   <div class="page ov">
-    <div class="page-head"><div><span class="label">${esc(P.venue)}</span><h1>${t('ov.title')}</h1></div>
-      <span class="pill mono" id="ov-model">${t('ov.model')} · YOLOv8n · <b id="ov-fps">—</b> ${t('fps')} · <b id="ov-lat">—</b> ms</span></div>
+    <div class="page-head"><div><span class="label">${esc(venueName(P))}</span><h1>${t('ov.title')}</h1></div>
+      <span class="pill" id="ov-model">${t('ov.model')} · YOLOv8n · <b id="ov-fps">—</b> ${t('fps')} · <b id="ov-lat">—</b> ${L('ms', 'مللي ث')}</span></div>
     <div class="ov-grid">
       <section class="panel hero-kpi">
         <i class="tick tl"></i><i class="tick br"></i>
         <span class="label">${t('kpi.inside')}</span>
         <div class="big num"><span id="k-inside">0</span><small>/ ${n(P.capacity)}</small></div>
         <div class="gauge" role="img" aria-label="${t('kpi.occupancy')}"><div class="gauge-fill" id="gauge"></div><div class="gauge-ticks"></div></div>
-        <div class="hero-foot"><span><b class="num" id="k-occ">0</b>% ${t('kpi.occupancy')}</span><span id="k-vs" class="mono dim"></span></div>
+        <div class="hero-foot"><span><b class="num" id="k-occ">0</b>% ${t('kpi.occupancy')}</span><span id="k-vs" class="dim"></span></div>
       </section>
       <section class="kpi-strip">${kp.map(k => `
         <div class="kpi" data-k="${k}"><span class="label">${t('kpi.' + k)}</span><b class="num" data-v>0</b><span class="spark" data-s></span><span class="delta mono" data-d></span></div>`).join('')}
@@ -80,7 +80,7 @@ export function mount(root) {
     if (ticks % 5 === 0) { drawFloor(); zones(); }
   };
   const zones = () => {
-    const rows = get().cams.flatMap(c => c.def.zones.map(z => ({ name: z.name, cam: c.def.id, cnt: c.agents.filter(a => a.cls === 'person' && a.x > z.x && a.x < z.x + z.w && a.y > z.y && a.y < z.y + z.h).length, kind: z.kind })))
+    const rows = get().cams.flatMap(c => c.def.zones.map(z => ({ name: zoneName(z), cam: c.def.id, cnt: c.agents.filter(a => a.cls === 'person' && a.x > z.x && a.x < z.x + z.w && a.y > z.y && a.y < z.y + z.h).length, kind: z.kind })))
       .sort((a, b) => b.cnt - a.cnt).slice(0, 6); const mx = Math.max(1, rows[0]?.cnt || 1);
     $('#zlist', root).innerHTML = rows.map(r => `<li><span>${esc(r.name)}<small class="mono dim">${r.cam}</small></span><i class="bar" style="--w:${r.cnt / mx}"></i><b class="num">${n(r.cnt)}</b></li>`).join('');
   };

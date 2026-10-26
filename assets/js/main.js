@@ -1,5 +1,5 @@
 import { get, set, on, pref } from './store.js';
-import { loadLang, preload, t, applyDom } from './i18n.js';
+import { loadLang, preload, t, applyDom, L, hijri, days as dayWord } from './i18n.js';
 import { boot, raise, getPreset } from './engine.js';
 import { refreshColors } from './render.js';
 import { restoreRemote, logout, can, canView } from './auth.js';
@@ -19,7 +19,7 @@ let unmountView = null, loginCleanup = null;
 const root = $('#root');
 
 async function init() {
-  const lang = pref.read('lang', 'en'), theme = pref.read('theme', 'dark');
+  const lang = pref.read('lang', 'ar'), theme = pref.read('theme', 'dark');
   document.documentElement.dataset.theme = theme;
   applyBrand(pref.read('brand', null));
   window.__demoBadge = document.querySelector('meta[name=demo-badge]')?.content !== '0';
@@ -53,21 +53,21 @@ function shell(keepRoute) {
   root.innerHTML = `
   <div id="app" data-rail="${pref.read('rail', 'e')}">
     <aside class="rail"><div class="brand">${b.logo ? `<img class="logo" src="${esc(b.logo)}" alt="">` : icon('mark', 'mark')}<span>${esc(b.name === 'SENTRA' ? t('app.name') : b.name)}</span></div>
-      <nav class="nav" aria-label="Main">${NAV.map(g => `<span class="label grp">${t(g.grp)}</span>${g.items.filter(([id]) => id === 'about' || canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span>${id === 'alerts' ? '<b class="count num" id="n-al" hidden></b>' : ''}</a>`).join('')}`).join('')}</nav>
+      <nav class="nav" aria-label="${L('Main navigation', 'التنقل الرئيسي')}">${NAV.map(g => `<span class="label grp">${t(g.grp)}</span>${g.items.filter(([id]) => id === 'about' || canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span>${id === 'alerts' ? '<b class="count num" id="n-al" hidden></b>' : ''}</a>`).join('')}`).join('')}</nav>
       <div class="rail-foot"><button class="btn primary" id="b-pilot">${icon('arrow', 'flip')}<span>${t('pilot.cta')}</span></button>
         <button class="btn ghost sm" id="b-rail" aria-label="${t('menu')}">${icon('menu')}</button></div></aside>
     <header class="top">
       <button class="search" id="b-cmd" aria-label="${t('search.ph')}">${icon('search')}<span>${t('search.ph')}</span><kbd class="kbd">Ctrl K</kbd></button>
       <span class="grow"></span>
       <span class="pill hide-m" ${window.__demoBadge ? '' : 'hidden'} title="${t('health.ok')}"><span class="led"></span><span>${t('demo.badge')}</span></span>
-      <span class="clock num hide-m" id="clock"></span>
+      ${get().lang === 'ar' ? `<span class="hijri hide-m" id="hijri">${hijri(new Date())}</span>` : ''}<span class="clock num hide-m" id="clock"></span>
       <button class="iconbtn" id="b-theme" data-i18n-title="theme">${icon(th === 'dark' ? 'sun' : 'moon')}</button>
-      <button class="iconbtn" id="b-lang" data-i18n-title="lang">${icon('globe')}</button>
-      ${can('presenter') ? `<button class="iconbtn" id="b-pres" title="Presenter (P)">${icon('presenter')}</button>` : ''}
+      <button class="btn ghost sm" id="b-lang" data-i18n-title="lang" lang="${get().lang === 'ar' ? 'en' : 'ar'}">${get().lang === 'ar' ? 'English' : 'العربية'}</button>
+      ${can('presenter') ? `<button class="iconbtn" id="b-pres" title="${t('pres.title')} (P)" aria-label="${t('pres.title')}">${icon('presenter')}</button>` : ''}
       <button class="iconbtn" id="b-out" data-i18n-title="signout">${icon('logout')}</button>
     </header>
     <main id="view" tabindex="-1"></main>
-    <nav class="bottomnav" aria-label="Main">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['analytics', 'chart']].filter(([id]) => canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.cta').split(' ')[0]}</span></a></nav>
+    <nav class="bottomnav" aria-label="${L('Main navigation', 'التنقل الرئيسي')}">${[['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell'], ['analytics', 'chart']].filter(([id]) => canView(id)).map(([id, ic]) => `<a href="#/${id}" data-r="${id}">${icon(ic)}<span>${t('nav.' + id)}</span></a>`).join('')}<a href="#" id="b-pilot-m">${icon('arrow', 'flip')}<span>${t('pilot.cta').split(' ')[0]}</span></a></nav>
   </div>`;
   applyDom(root);
   $('#b-theme').onclick = switchTheme; $('#b-lang').onclick = switchLang;
@@ -107,22 +107,22 @@ on('alert:new', () => { const a = get().alerts[0]; if (a) announce(`${t('sev.' +
 // ---- pilot lead modal ----
 function pilot() {
   modal(`<h2>${t('pilot.cta')}</h2><form id="pf" class="grid2" novalidate>
-    <div class="field"><label class="label">Name</label><input name="name" required autocomplete="name"></div>
-    <div class="field"><label class="label">Venue</label><input name="venue" required></div>
-    <div class="field"><label class="label">Type</label><select name="type"><option>${t('preset.cafe')}</option><option>${t('preset.restaurant')}</option><option>${t('preset.hospital')}</option></select></div>
-    <div class="field"><label class="label">Cameras</label><input name="cams" type="number" min="1" max="500" value="8"></div>
-    <div class="field"><label class="label">WhatsApp / Phone</label><input name="phone" type="tel" autocomplete="tel"></div>
-    <div class="field"><label class="label">Email</label><input name="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label class="label">${L('Name', 'الاسم')}</label><input name="name" required autocomplete="name"></div>
+    <div class="field"><label class="label">${L('Venue', 'اسم المنشأة')}</label><input name="venue" required></div>
+    <div class="field"><label class="label">${L('Type', 'نوع النشاط')}</label><select name="type"><option>${t('preset.cafe')}</option><option>${t('preset.restaurant')}</option><option>${t('preset.hospital')}</option></select></div>
+    <div class="field"><label class="label">${L('Cameras', 'عدد الكاميرات')}</label><input name="cams" type="number" min="1" max="500" value="8"></div>
+    <div class="field"><label class="label">${L('WhatsApp / Phone', 'واتساب / الجوال')}</label><input name="phone" type="tel" autocomplete="tel" dir="ltr" placeholder="+966 5X XXX XXXX"></div>
+    <div class="field"><label class="label">${L('Email', 'البريد الإلكتروني')}</label><input name="email" type="email" autocomplete="email" required dir="ltr"></div>
     <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
-    <div class="field full"><label class="label">Notes</label><textarea name="notes" rows="3"></textarea></div>
+    <div class="field full"><label class="label">${L('Notes', 'ملاحظات')}</label><textarea name="notes" rows="3"></textarea></div>
     <div class="full row"><button type="submit" class="btn primary">${t('pilot.cta')}</button></div></form>`, (back, close) => {
     $('#pf', back).addEventListener('submit', async (e) => {
       e.preventDefault(); const fd = Object.fromEntries(new FormData(e.target)); if (fd.website) return close();
-      if (!fd.name || !fd.email) { toast('Name and email are required'); return; }
+      if (!fd.name || !fd.email) { toast(L('Name and email are required', 'الاسم والبريد الإلكتروني مطلوبان')); return; }
       const res = await post('leads.php', fd);
-      if (res && res.status === 429) { toast('Too many requests — try again later'); return; }
+      if (res && res.status === 429) { toast(L('Too many requests — try again later', 'محاولات كثيرة، يُرجى المحاولة لاحقاً')); return; }
       const q = pref.read('leads', []); q.push({ ...fd, ts: Date.now() }); pref.write('leads', q);
-      close(); toast('✓ ' + t('pilot.cta'));
+      close(); toast(L('Request received — we will contact you shortly', 'تم استلام طلبكم — سنتواصل معكم قريباً'));
     });
   });
 }

@@ -1,6 +1,8 @@
 // Canvas renderer: procedural camera scene + detection overlay. Same overlay code would draw baked tracks over <video>.
 import { get } from './store.js';
 import { simTime } from './engine.js';
+import { zoneName, clsWord } from './i18n.js';
+const FONT = '"JetBrains Mono","Plex Arabic",monospace';
 
 const cssv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 let C = null;
@@ -56,7 +58,7 @@ export function drawTile(canvas, cam, opts = {}) {
     const col = z.kind === 'restricted' ? C.crit : z.kind === 'queue' ? C.warn : C.info;
     ctx.fillStyle = col + '14'; ctx.strokeStyle = col + 'aa'; ctx.setLineDash([5, 4]);
     ctx.fillRect(z.x * W, z.y * H, z.w * W, z.h * H); ctx.strokeRect(z.x * W + .5, z.y * H + .5, z.w * W, z.h * H); ctx.setLineDash([]);
-    if (opts.labels !== false) { ctx.fillStyle = col; ctx.font = '500 10px "JetBrains Mono",monospace'; ctx.fillText(z.name.toUpperCase(), z.x * W + 5, z.y * H + 13); }
+    if (opts.labels !== false) { const ar = get().lang === 'ar'; ctx.fillStyle = col; ctx.font = `500 ${ar ? 11 : 10}px ${FONT}`; ctx.direction = ar ? 'rtl' : 'ltr'; ctx.textAlign = 'left'; ctx.fillText(ar ? zoneName(z) : z.name.toUpperCase(), z.x * W + 5, z.y * H + 13); ctx.direction = 'ltr'; }
   }
   if (fl.zones && def.line) {
     ctx.strokeStyle = C.signal; ctx.lineWidth = 2; ctx.beginPath();
@@ -88,10 +90,10 @@ export function drawTile(canvas, cam, opts = {}) {
       ctx.strokeStyle = hot ? C.crit : C.signal; ctx.lineWidth = hot ? 2 : 1;
       corners(ctx, bx, by, bw, bh);
       if (opts.labels !== false) {
-        const label = `${a.cls === 'person' ? (a.staff ? 'staff' : 'person') : a.cls} #${a.id} ${Math.round(a.conf * 100)}%`;
-        ctx.font = '500 9px "JetBrains Mono",monospace'; const tw = ctx.measureText(label).width + 8;
+        const ar = get().lang === 'ar', label = ar ? `${clsWord(a.cls, a.staff)} ⁦${Math.round(a.conf * 100)}%⁩ ⁦#${a.id}⁩` : `${a.cls === 'person' ? (a.staff ? 'staff' : 'person') : a.cls} #${a.id} ${Math.round(a.conf * 100)}%`;
+        ctx.font = `500 ${ar ? 10 : 9}px ${FONT}`; ctx.direction = ar ? 'rtl' : 'ltr'; ctx.textAlign = 'left'; const tw = ctx.measureText(label).width + (ar ? 14 : 8);
         ctx.fillStyle = hot ? C.crit : C.signal; ctx.fillRect(bx, by - 13, tw, 13);
-        ctx.fillStyle = '#10140A'; ctx.fillText(label, bx + 4, by - 3);
+        ctx.fillStyle = '#10140A'; ctx.fillText(label, bx + 4, by - 3); ctx.direction = 'ltr';
       }
     }
   }
@@ -104,7 +106,7 @@ export function drawTile(canvas, cam, opts = {}) {
   }
   if (rp) {
     ctx.restore(); W = W0; H = H0;
-    ctx.fillStyle = '#B4C0CB'; ctx.font = '500 9px "JetBrains Mono",monospace'; ctx.fillText('SAMPLE FOOTAGE · BAKED DETECTIONS', 10, H0 - 28);
+    ctx.fillStyle = '#B4C0CB'; ctx.font = '500 9px "JetBrains Mono",monospace'; ctx.direction = get().lang === 'ar' ? 'rtl' : 'ltr'; ctx.fillText(get().lang === 'ar' ? 'لقطات تجريبية · اكتشافات محسوبة مسبقاً' : 'SAMPLE FOOTAGE · BAKED DETECTIONS', 10, H0 - 28); ctx.direction = 'ltr';
   }
   // low-light IR look + grain
   if (def.night) { ctx.fillStyle = 'rgba(30,255,120,.06)'; ctx.globalCompositeOperation = 'overlay'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }
@@ -123,6 +125,6 @@ function skeleton(ctx, x, y, w, h) {
 }
 function reconnect(ctx, W, H, t) {
   ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = C.warn; ctx.font = '500 12px "JetBrains Mono",monospace'; ctx.textAlign = 'center';
-  ctx.fillText('RECONNECTING' + '.'.repeat(1 + Math.floor(t * 2) % 3), W / 2, H / 2); ctx.textAlign = 'start';
+  ctx.fillStyle = C.warn; ctx.font = `500 13px ${FONT}`; ctx.textAlign = 'center'; const ar = get().lang === 'ar'; ctx.direction = ar ? 'rtl' : 'ltr';
+  ctx.fillText((ar ? 'جارٍ إعادة الاتصال' : 'RECONNECTING') + '.'.repeat(1 + Math.floor(t * 2) % 3), W / 2, H / 2); ctx.direction = 'ltr'; ctx.textAlign = 'start';
 }

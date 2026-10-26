@@ -225,3 +225,18 @@
   .hl{background:var(--ink-1);padding:var(--s4);display:grid;gap:8px}.hl b{font:700 var(--t-xl)/1 var(--font-mono)}.hl small{font-size:var(--t-sm);color:var(--fg-2);font-weight:400}
   @media (max-width:900px){.st-grid{grid-template-columns:1fr}.tabs{display:flex;overflow-x:auto}.tabs button{white-space:nowrap}}
 }
+@layer views{
+  /* Arabic typography & bidi hygiene */
+  :lang(ar) body{line-height:1.7}
+  :lang(ar) h1,:lang(ar) h2,:lang(ar) h3{font-weight:600;line-height:1.4}
+  :lang(ar) .label{font-weight:500;color:var(--fg-1);font-size:var(--t-sm)}
+  :lang(ar) .btn,:lang(ar) .chip b{font-weight:500}
+  :lang(ar) .kpi b,:lang(ar) .big{line-height:1.1}
+  [dir=rtl] span.mono,[dir=rtl] b.mono,[dir=rtl] dd.mono{unicode-bidi:isolate}
+  .clock{white-space:nowrap}
+  .kbd{direction:ltr;unicode-bidi:isolate}
+  .hijri{font-size:var(--t-sm);color:var(--fg-1);white-space:nowrap}
+  input[dir=ltr]::placeholder{text-align:start}
+  [dir=rtl] .tile-top{direction:rtl}
+  @media (max-width:1100px){.hijri{display:none}}
+}

@@ -17,7 +17,7 @@ export function mount(root) {
       <div class="transport"><button class="btn sm" id="pb-play" aria-pressed="true">${icon('play')}<span>${L('Pause', 'إيقاف مؤقت')}</span></button>
         <div class="seg" role="group">${[.5, 1, 2, 4].map(s => `<button class="btn sm" data-sp="${s}" aria-pressed="${s === 1}">${s}×</button>`).join('')}</div>
         <span class="mono dim" id="pb-mode">${L('RECORDED · replay', 'مسجّل · إعادة')}</span></div>
-      <div class="timeline" id="tl" role="slider" aria-label="Timeline" aria-valuemin="0" aria-valuemax="1439" tabindex="0"><div class="tl-track"></div><div class="tl-marks" id="tl-m"></div><div class="tl-head" id="tl-h"></div>
+      <div class="timeline" id="tl" role="slider" aria-label="${L('Timeline', 'الخط الزمني')}" aria-valuemin="0" aria-valuemax="1439" tabindex="0"><div class="tl-track"></div><div class="tl-marks" id="tl-m"></div><div class="tl-head" id="tl-h"></div>
         <div class="tl-ax mono">${[0, 6, 12, 18, 24].map(h => `<span>${String(h).padStart(2, '0')}:00</span>`).join('')}</div></div></section>
     <section class="panel pb-jobs"><header><span class="label">${L('Upload footage for analysis', 'رفع مقاطع للتحليل')}</span></header>
       <label class="drop" for="pb-file"><span>${icon('upload')}${L('Drop a video here or browse', 'اسحب مقطعاً هنا أو تصفّح')}</span><input id="pb-file" type="file" accept="video/*" class="sr-only"></label>
