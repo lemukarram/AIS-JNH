@@ -3,8 +3,10 @@
 Sales-demo control room for cafés, restaurants and hospitals. Full brief: [docs/PLAN.md](docs/PLAN.md).
 
 ## Status
-Phase 1–3 done: design system, EN/AR (RTL) shell, simulation engine (pipeline C), login, overview, live wall, alerts.
-Pending: analytics, playback, reports, cameras/zones editor, settings/RBAC, PHP API + installer, bake tool, docs.
+Built: design system, EN/AR (RTL) shell, simulation engine, login, overview, live wall, alerts, analytics, playback + batch-job simulation, reports (PDF/CSV), cameras and zone/line editor, settings, RBAC, PHP API + installer, bake tool, docs.
+Not built yet: baked-track replay over <video> in the browser (tool + schema exist), in-browser live inference (stretch), polygon zones (rectangles + tripwire lines only), full-text QA across all screens/sizes.
+
+Deploy: [README_DEPLOY.md](README_DEPLOY.md) · Sales script: [DEMO_SCRIPT.md](DEMO_SCRIPT.md)
 
 ## Run locally (no PHP needed for the front-end)
     node tools/serve.js 8080

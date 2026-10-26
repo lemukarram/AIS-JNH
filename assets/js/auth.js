@@ -13,26 +13,26 @@ export const CAN = {
 };
 export const can = (perm) => { const r = get().user?.role; const p = CAN[r] || []; return p.includes('*') || p.includes(perm); };
 
-async function api(path, body) {
-  try {
-    const r = await fetch('api/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
-    if (!r.ok && r.status !== 401) return null;
-    const ct = r.headers.get('content-type') || '';
-    if (!ct.includes('json')) return null;
-    return { status: r.status, data: await r.json() };
-  } catch { return null; }
-}
+import { post, setCsrf, hasBackend } from './api.js';
+const api = (path, body) => post(path, body);
 
 export async function login(email, pw) {
   const remote = await api('auth.php', { action: 'login', email, password: pw });
   if (remote) {
-    if (remote.status === 200 && remote.data.user) return finish(remote.data.user);
+    if (remote.status === 200 && remote.data.user) { setCsrf(remote.data.csrf); return finish(remote.data.user); }
     return false;
   }
   const a = ACCOUNTS.find(x => x.email === email.trim().toLowerCase() && x.pw === pw);
   return a ? finish({ email: a.email, role: a.role, name: a.name }) : false;
 }
 function finish(user) { set({ user }, 'user'); try { sessionStorage.setItem('sentra.user', JSON.stringify(user)); } catch {} return true; }
+export async function restoreRemote() {
+  if (!hasBackend()) return restore();
+  const r = await api('auth.php', { action: 'me' });
+  if (r && r.status === 200 && r.data.user) { setCsrf(r.data.csrf); return finish(r.data.user); }
+  try { sessionStorage.removeItem('sentra.user'); } catch {}
+  return false;
+}
 export function restore() {
   try { const u = JSON.parse(sessionStorage.getItem('sentra.user')); if (u) { set({ user: u }, 'user'); return true; } } catch {}
   return false;

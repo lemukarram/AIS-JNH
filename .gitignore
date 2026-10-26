@@ -147,3 +147,8 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# SENTRA runtime
+data/*.sqlite*
+data/installed.lock
+source_videos/

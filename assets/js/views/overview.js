@@ -68,7 +68,7 @@ export function mount(root) {
     $('#gauge', root).style.setProperty('--v', k.occupancy / 100);
     $('#gauge', root).parentElement.classList.toggle('hot', k.occupancy > 85);
     const dy = k.footfall - Math.round(k.yesterday * Math.min(1, (get().now % 864e5) / 864e5 + .4));
-    $('#k-vs', root).textContent = `${t('kpi.vsYesterday')} ${dy >= 0 ? '+' : '−'}${n(Math.abs(Math.round(dy / Math.max(1, k.footfall) * 100)))}%`;
+    $('#k-vs', root).innerHTML = `${t('kpi.vsYesterday')} <bdi dir="ltr">${dy >= 0 ? '+' : '−'}${n(Math.abs(Math.round(dy / Math.max(1, k.footfall) * 100)))}%</bdi>`;
     $('#ov-fps', root).textContent = k.fps; $('#ov-lat', root).textContent = k.latency;
     $$('.kpi', root).forEach(el => {
       const key = el.dataset.k; let v = key === 'cams' ? k.cams : k[key];

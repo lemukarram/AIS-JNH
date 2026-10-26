@@ -2,10 +2,11 @@ import { get, set, on, pref } from './store.js';
 import { loadLang, preload, t, applyDom } from './i18n.js';
 import { boot, raise, getPreset } from './engine.js';
 import { refreshColors } from './render.js';
-import { restore, logout, can, canView } from './auth.js';
+import { restoreRemote, logout, can, canView } from './auth.js';
 import { icon } from './icons.js';
 import { $, $$, h, toast, modal, clock, esc, announce } from './ui.js';
 import { PRESETS } from './presets.js';
+import { post } from './api.js';
 
 const NAV = [
   { grp: 'nav.operate', items: [['overview', 'grid'], ['wall', 'wall'], ['alerts', 'bell']] },
@@ -20,11 +21,12 @@ async function init() {
   const lang = pref.read('lang', 'en'), theme = pref.read('theme', 'dark');
   document.documentElement.dataset.theme = theme;
   applyBrand(pref.read('brand', null));
+  window.__demoBadge = document.querySelector('meta[name=demo-badge]')?.content !== '0';
   await preload(); await loadLang(lang);
   boot(pref.read('preset', 'cafe'));
   refreshColors();
   document.addEventListener('toggle-lang', () => switchLang());
-  if (restore()) shell(); else showLogin();
+  if (await restoreRemote()) shell(); else showLogin();
 }
 
 function showLogin() {
@@ -56,7 +58,7 @@ function shell(keepRoute) {
     <header class="top">
       <button class="search" id="b-cmd" aria-label="${t('search.ph')}">${icon('search')}<span>${t('search.ph')}</span><kbd class="kbd">Ctrl K</kbd></button>
       <span class="grow"></span>
-      <span class="pill hide-m" title="${t('health.ok')}"><span class="led"></span><span>${t('demo.badge')}</span></span>
+      <span class="pill hide-m" ${window.__demoBadge ? '' : 'hidden'} title="${t('health.ok')}"><span class="led"></span><span>${t('demo.badge')}</span></span>
       <span class="clock num hide-m" id="clock"></span>
       <button class="iconbtn" id="b-theme" data-i18n-title="theme">${icon(th === 'dark' ? 'sun' : 'moon')}</button>
       <button class="iconbtn" id="b-lang" data-i18n-title="lang">${icon('globe')}</button>
@@ -116,7 +118,8 @@ function pilot() {
     $('#pf', back).addEventListener('submit', async (e) => {
       e.preventDefault(); const fd = Object.fromEntries(new FormData(e.target)); if (fd.website) return close();
       if (!fd.name || !fd.email) { toast('Name and email are required'); return; }
-      try { await fetch('api/leads.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fd) }); } catch {}
+      const res = await post('leads.php', fd);
+      if (res && res.status === 429) { toast('Too many requests — try again later'); return; }
       const q = pref.read('leads', []); q.push({ ...fd, ts: Date.now() }); pref.write('leads', q);
       close(); toast('✓ ' + t('pilot.cta'));
     });

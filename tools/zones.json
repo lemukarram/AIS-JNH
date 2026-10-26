@@ -1,0 +1,4 @@
+{
+  "cam1": { "line": { "a": [0.1, 0.55], "b": [0.9, 0.55] }, "zones": [{ "name": "Door threshold", "kind": "zone", "x": 0.15, "y": 0.4, "w": 0.7, "h": 0.4 }] },
+  "cam2": { "zones": [{ "name": "Queue zone", "kind": "queue", "x": 0.08, "y": 0.42, "w": 0.26, "h": 0.5 }] }
+}
